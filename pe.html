@@ -143,6 +143,7 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <button onclick="savepage2()" style="padding: 20px; border-radius: 50px;">Save Progress</button>
 <button onclick="showdata()" style="padding: 20px; border-radius: 50px;">Search</button>
 <button onclick="confirmtimetable()" style="padding: 20px; border-radius: 50px;">Sort by Teachers</button>	
+<button onclick="generate()" style="padding: 20px; border-radius: 50px;">Generate Time Table</button>	
 <div id="showdataarea"></div>
 </div>
 <div hidden=true id="showfinaldata">
@@ -185,6 +186,10 @@ colorlist[27] = "black";
 colorlist[28] = "black";
 colorlist[29] = "black";
 colorlist[30] = "black";
+
+function generate(){
+	
+}
 
 function showsaveddata(){
 	if (typeof(Storage)!=="undefined"){
@@ -348,20 +353,48 @@ function checktable(x,y){
 	// 		}
 	// 	}
 	// }
-	teachingplanct[x.selectedIndex]++;
-	teachingplanct[oldindex]--;
-	var temptable = document.getElementById(x.options[x.selectedIndex].text+"timetable");
-	var timeofcell = table.rows[x.parentNode.parentNode.rowIndex].cells[1].innerHTML;
 	var dayofcell = x.parentNode.cellIndex-2;
-	var endpoint = 0;
-	while (temptable.rows[endpoint].cells[dayofcell].innerHTML!='+')
-		endpoint++;
-	temptable.rows[endpoint].cells[dayofcell].innerHTML = timeofcell;
-	temptable.rows[endpoint+1].cells[dayofcell].innerHTML = "+";
-	for (var j=0; j<=dayofcell; j++)
-		temptable.rows[endpoint+1].cells[j].style.display = "";
-	temptable.rows[endpoint+1].cells[dayofcell].style.border = '4px solid #FFFFFF';
-	sorttable(x,temptable);
+	var timeofcell = table.rows[x.parentNode.parentNode.rowIndex].cells[1].innerHTML;
+
+	if (oldindex>0){
+		teachingplanct[oldindex]--;
+		var temptable = document.getElementById(x.options[oldindex].text.substring(0,x.options[oldindex].text.indexOf(" "))+"timetable");
+		var coursecode = x.options[oldindex].text.substring(x.options[oldindex].text.indexOf(" ")+1, x.options[oldindex].text.length);
+		var tempj = 1;
+		while (temptable.rows[tempj].cells[dayofcell].innerHTML!=timeofcell+' '+coursecode){
+			// alert(temptable.rows[tempj].cells[dayofcell].innerHTML+' '+timeofcell+' '+coursecode);
+			tempj++;
+		}
+		var ct = tempj;
+		// alert(ct);
+		while (temptable.rows[ct+1].cells[dayofcell].innerHTML!=""){
+			temptable.rows[ct].cells[dayofcell].innerHTML = temptable.rows[ct+1].cells[dayofcell].innerHTML
+			ct++;
+		}
+		if (ct>1){
+			temptable.rows[ct].cells[dayofcell].innerHTML = "";
+			// temptable.rows[ct].cells[x.cellIndex].style.display = "none";
+			temptable.rows[ct].cells[dayofcell].style.border = "0px";
+		}
+	}
+	
+	if (x.selectedIndex>0){
+		teachingplanct[x.selectedIndex]++;
+		var temptable = document.getElementById(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" "))+"timetable");
+		var coursecode = x.options[x.selectedIndex].text.substring(x.options[x.selectedIndex].text.indexOf(" ")+1, x.options[x.selectedIndex].text.length);
+		// alert(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" ")));
+		var endpoint = 1;
+		while (temptable.rows[endpoint].cells[dayofcell].innerHTML!='+')
+			endpoint++;
+		// alert(endpoint);
+		temptable.rows[endpoint].cells[dayofcell].innerHTML = timeofcell+' '+coursecode;
+		temptable.rows[endpoint+1].cells[dayofcell].innerHTML = "+";
+		for (var j=0; j<=dayofcell; j++)
+			temptable.rows[endpoint+1].cells[j].style.display = "";
+		temptable.rows[endpoint+1].cells[dayofcell].style.border = '4px solid #FFFFFF';
+		sorttable(temptable.rows[endpoint].cells[dayofcell],temptable);
+	}
+
 	for (var j=1; j<=9; j++){
 		for (var k=2; k<=7; k++){
 			var tempoption  = table.rows[j].cells[k].childNodes[0];
@@ -473,13 +506,13 @@ function nextpage(){
 
 function comparetime(x,y){
 	var tempfromhour = parseInt(x[0]*10+x[1]);
-	var tempfromminute = parseInt(x[3]+x[4]);
-	var temptohour = parseInt(x[6]+x[7]);
-	var temptominute = parseInt(x[9]+x[10]);
+	var tempfromminute = parseInt(x[3]*10+x[4]);
+	var temptohour = parseInt(x[6]*10+x[7]);
+	var temptominute = parseInt(x[9]*10+x[10]);
 	var tempfromhour2 = parseInt(y[0]*10+y[1]);
-	var tempfromminute2 = parseInt(y[3]+y[4]);
-	var temptohour2 = parseInt(y[6]+y[7]);
-	var temptominute2 = parseInt(y[9]+y[10]);
+	var tempfromminute2 = parseInt(y[3]*10+y[4]);
+	var temptohour2 = parseInt(y[6]*10+y[7]);
+	var temptominute2 = parseInt(y[9]*10+y[10]);
 	if (temptohour<tempfromhour2||temptohour==tempfromhour2&&temptominute<tempfromhour2){
 		return 0;
 	} else if (tempfromhour>temptohour2||tempfromhour==temptohour2&&tempfromminute>temptominute2){
@@ -493,11 +526,11 @@ function comparetime(x,y){
 
 function sorttable(x,y){
 	var sortrownum = x.cellIndex;
-	//alert(sortrownum);
-	for (var j=0; j<=x.parentNode.rowIndex-1; j++){
+	for (var j=1; j<=x.parentNode.rowIndex-1; j++){
 		for (var k=j+1; k<=x.parentNode.rowIndex; k++){
+			// alert(y.rows[j].cells[sortrownum].innerHTML+' '+y.rows[k].cells[sortrownum].innerHTML+' '+comparetime(y.rows[j].cells[sortrownum].innerHTML,y.rows[k].cells[sortrownum].innerHTML));
 			if (comparetime(y.rows[j].cells[sortrownum].innerHTML,y.rows[k].cells[sortrownum].innerHTML)==1){
-				alert(j+' '+k);
+				// alert(j+' '+k);
 				var tempcell = y.rows[j].cells[sortrownum].innerHTML;
 				y.rows[j].cells[sortrownum].innerHTML = y.rows[k].cells[sortrownum].innerHTML;
 				y.rows[k].cells[sortrownum].innerHTML = tempcell;
@@ -523,7 +556,7 @@ function addtime(x){
 			}
 		}
 		else if (answer[2]==':'&&answer[8]==':'&&answer[5]=='-'){
-			temptable.rows[x.parentNode.rowIndex].cells[x.cellIndex].innerHTML = answer;
+			temptable.rows[x.parentNode.rowIndex].cells[x.cellIndex].innerHTML = answer+' NA';
 			if (temptable.rows[x.parentNode.rowIndex+1].cells[x.cellIndex].innerHTML == '')
 				temptable.rows[x.parentNode.rowIndex+1].cells[x.cellIndex].innerHTML = '+';
 			for (var j=0; j<=x.cellIndex; j++)
