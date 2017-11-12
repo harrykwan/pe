@@ -187,8 +187,42 @@ colorlist[28] = "black";
 colorlist[29] = "black";
 colorlist[30] = "black";
 
+var orderlist = [];
+orderlist[0] = 2;
+orderlist[1] = 3;
+orderlist[2] = 4;
+orderlist[3] = 6;
+orderlist[4] = 7;
+orderlist[5] = 5;
+orderlist[6] = 1;
+
+
+function dfs(t,x,y,n){
+	t.rows[x].cells[y].childNodes[0].options[n].selected = true;
+	teachingplanct[document.getElementById("choosevenuepage").selectedIndex][n]++;
+	for (var j=1; j<table.rows.length; j++){
+		for (var k=2; k<table.rows[j].cells.length; k++){
+			
+		}
+	}
+}
+
 function generate(){
-	
+	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
+	var pass = true;
+	for (var j=1; j<table.rows.length; j++){
+		for (var k=2; k<table.rows[j].cells.length; k++){
+			if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+				pass = false;
+				break;
+			}
+		}
+	}
+	if (pass == false){
+		alert("Please cancel all selected options in the table first.");
+	} else {
+
+	}
 }
 
 function showsaveddata(){
