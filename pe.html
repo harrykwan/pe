@@ -222,7 +222,20 @@ function dfs(t,c,x,y,n){
 				if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[1].innerHTML=='x'&&t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].selectedIndex==0){
 					for (var jj=1; jj<t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].length; jj++){
 						if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
-							dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
+							var singlelesson = false;
+							if (teachingplanct[c][optionlist[jj]]==1&&orderlistx[j]>1&&t.rows[orderlistx[j]-1].cells[orderlisty[k]].childNodes[0].selectedIndex!=optionlist[jj]){
+								for (var kk=1; kk<=tablexlength; kk++)
+									if (kk!=orderlistx[j]&&t.rows[kk].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj]){
+										singlelesson = true;
+										break;
+									}
+									alert(singlelesson);
+									if (singlelesson==false){
+										dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
+									}
+							} else {
+								dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
+							}							
 						}
 					}
 				}
@@ -280,15 +293,35 @@ function generate(){
 			startoption++;
 		}
 		if (generatedone==(table.rows[1].cells[2].childNodes[0].length-1)*2){
-
-
 			//check
 			for (var j=1; j<table.rows.length; j++){
 				for (var k=2; k<table.rows[j].cells.length; k++){
-					table.rows[j].cells[k].disabled = true;
+					for (var jj=1; jj<table.rows[j].cells[k].childNodes[0].length; jj++)
+					table.rows[j].cells[k].childNodes[0].options[jj].disabled = true;
 				}
 			}
-			//add to teacher timetable
+			for (var j=1; j<table.rows.length; j++){
+				for (var k=2; k<table.rows[j].cells.length; k++){
+					if (table.rows[j].cells[k].childNodes[0].selectedIndex>0){
+						var x = table.rows[j].cells[k].childNodes[0];
+						var timeofcell = table.rows[j].cells[1].innerHTML;
+						var dayofcell = k-2;
+						var temptable = document.getElementById(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" "))+"timetable");
+						var coursecode = x.options[x.selectedIndex].text.substring(x.options[x.selectedIndex].text.indexOf(" ")+1, x.options[x.selectedIndex].text.length);
+						// alert(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" ")));
+						var endpoint = 1;
+						while (temptable.rows[endpoint].cells[dayofcell].innerHTML!='+')
+							endpoint++;
+						// alert(endpoint);
+						temptable.rows[endpoint].cells[dayofcell].innerHTML = timeofcell+' '+coursecode;
+						temptable.rows[endpoint+1].cells[dayofcell].innerHTML = "+";
+						for (var jj=0; jj<=dayofcell; jj++)
+							temptable.rows[endpoint+1].cells[jj].style.display = "";
+						temptable.rows[endpoint+1].cells[dayofcell].style.border = '4px solid #FFFFFF';
+						sorttable(temptable.rows[endpoint].cells[dayofcell],temptable);
+					}
+				}
+			}
 		} else {
 			alert("There is no solution, please swap the previous timetable.");
 		}
@@ -357,6 +390,7 @@ function confirmtimetable(x){
 	if (x=='back'){
 		document.getElementById("startchoosing").hidden = false;
 		document.getElementById("showfinaldata").hidden = true;
+		changetable(document.getElementById("tableheader").innerHTML);
 	} else {
 		document.getElementById("startchoosing").hidden = true;
 		document.getElementById("showfinaldata").hidden = false;
@@ -542,7 +576,7 @@ function changetable(x){
 							break;
 						}
 					}
-					if (crashed){
+					if (crashed||teachingplanct[document.getElementById("choosevenuepage").selectedIndex][jj]>=2){
 						tempoption.options[jj].disabled = true;
 					} else {
 						tempoption.options[jj].disabled = false;
