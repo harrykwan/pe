@@ -5,19 +5,16 @@
 select option[disabled] {
     display: none;
 }
-
 button {
     background-color: black;
     color: white;
     border-radius: 4px;
 }
-
 body{
 	background-color: black;
 	color: white;
 	font-family: arial;
 }
-
 input[type=text] {
     background-color: black;
     color: white;
@@ -26,7 +23,6 @@ input[type=text] {
     padding: 3px;
     margin-left: 3px;
 }
-
 input[type=number] {
     background-color: black;
     color: white;
@@ -36,33 +32,28 @@ input[type=number] {
     margin-left: 1px;
     width: 50px;
 }
-
 select{
 	border: 2px solid white;
 	background-color: black;
 	color: white;
 	width: 70px;
 }
-
 #teacherlistarea,#venuelistarea,#sportslistarea,#teachingplanlistarea{
 	width: 50%;
 	border: 4px solid white;
 	padding: 6px;
 	border-radius: 4px;
 }
-
 #timetable{
 	border: 4px solid white;
 	padding: 40px;
 	width: 60%;
 }
-
 th{
 	height: 70px;
 	padding: 10px;
 	border: 4px solid white;
 }
-
 </style>
 </head>
 
@@ -187,40 +178,70 @@ colorlist[28] = "black";
 colorlist[29] = "black";
 colorlist[30] = "black";
 
-var orderlist = [];
-orderlist[1] = 2;
-orderlist[2] = 3;
-orderlist[3] = 4;
-orderlist[4] = 6;
-orderlist[5] = 7;
-orderlist[6] = 8;
-orderlist[7] = 9;
-orderlist[8] = 5;
-orderlist[9] = 1;
+var orderlistx = [];
+orderlistx[1] = 1;
+orderlistx[2] = 2;
+orderlistx[3] = 3;
+orderlistx[4] = 4;
+orderlistx[5] = 5;
+orderlistx[6] = 6;
+orderlistx[7] = 7;
+orderlistx[8] = 8;
+orderlistx[9] = 9;
+
+var orderlisty = [];
+orderlisty[2] = 2;
+orderlisty[3] = 6;
+orderlisty[4] = 3;
+orderlisty[5] = 4;
+orderlisty[6] = 5;
+orderlisty[7] = 7;
+// orderlisty[8] = 8;
+
+var tablexlength = 8;
+var tableylength = 6;
+
+var optionlist = [];
 
 var generatedone = 0;
-
 function dfs(t,c,x,y,n){
-	t.rows[x].cells[y].childNodes[0].options[n].selected = true;
-	generatedone++;
-	teachingplanct[document.getElementById("choosevenuepage").selectedIndex][n]++;
-	if (generatedone<t.rows[1].cells[2].childNodes[0].length){
-		for (var j=1; j<t.rows.length; j++){
-			for (var k=2; k<t.rows[j].cells.length; k++){
-				for (var jj=0; jj<t.rows[j].cells[k].childNodes[0].length; jj++){
-					if (t.rows[orderlist[j]].cells[k].childNodes[0].options[jj].disabled==false&&teachingplanct[c][jj]<=2){
-						dfs(t,c,orderlist[j],k,jj);
+	// alert(x+' '+y+' '+n);
+	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"){
+		t.rows[x].cells[y].childNodes[0].options[n].selected = true;
+		t.rows[x].cells[y].style.backgroundColor = colorlist[n];
+		generatedone++;
+		teachingplanct[c][n]++;
+	}
+	
+	if (generatedone<(t.rows[1].cells[2].childNodes[0].length-1)*2){
+		// for (var j=1; j<t.rows.length; j++){
+		// 	for (var k=2; k<t.rows[j].cells.length; k++){
+		for (var k=2; k<=tableylength; k++){
+			for (var j=1; j<=tablexlength; j++){
+				// alert(t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[1].innerHTML);
+				if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[1].innerHTML=='x'&&t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].selectedIndex==0){
+					for (var jj=1; jj<t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].length; jj++){
+						if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
+							dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
+						}
 					}
 				}
 			}
 		}
-		teachingplanct[document.getElementById("choosevenuepage").selectedIndex][n]--;
-		generatedone--;
-		t.rows[x].cells[y].childNodes[0].options[n].selected = false;
+		if (generatedone==(t.rows[1].cells[2].childNodes[0].length-1)*2){
+			return;
+		}
+		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"){
+			teachingplanct[c][n]--;
+			generatedone--;
+			t.rows[x].cells[y].style.backgroundColor = "black";
+			t.rows[x].cells[y].childNodes[0].options[0].selected = true;
+		}
+	} else {
+		return;
 	}
 	
 }
-
 function generate(){
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
@@ -236,10 +257,43 @@ function generate(){
 		alert("Please cancel all selected options in the table first.");
 	} else {
 		generatedone = 0;
-		dfs(table,document.getElementById("choosevenuepage").selectedIndex,1,2,0);
+		var tempselect = table.rows[1].cells[2].childNodes[0];
+		var templist = [];
+		for (var j=0; j<tempselect.length; j++){
+			templist[j] = tempselect.options[j].text.substring(0,tempselect.options[j].text.indexOf(" "));
+			optionlist[j] = j;
+		}
+		for (var j=1; j<tempselect.length-1; j++){
+			var different = j+1;
+			while (templist[j]==templist[different]&&different<tempselect.length-1)
+				different++;
+			var tempswap = templist[j+1];
+			templist[j+1] = templist[different];
+			templist[different] = tempswap;
+			var tempswap2 = optionlist[j+1];
+			optionlist[j+1] = optionlist[different];
+			optionlist[different] = tempswap2;
+		}
+		var startoption = 1;
+		while (generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2 && startoption<table.rows[1].cells[2].childNodes[0].length){
+			dfs(table,document.getElementById("choosevenuepage").selectedIndex,1,2,startoption);
+			startoption++;
+		}
+		if (generatedone==(table.rows[1].cells[2].childNodes[0].length-1)*2){
+
+
+			//check
+			for (var j=1; j<table.rows.length; j++){
+				for (var k=2; k<table.rows[j].cells.length; k++){
+					table.rows[j].cells[k].disabled = true;
+				}
+			}
+			//add to teacher timetable
+		} else {
+			alert("There is no solution, please swap the previous timetable.");
+		}
 	}
 }
-
 function showsaveddata(){
 	if (typeof(Storage)!=="undefined"){
 		if (localStorage.getItem("mypage")!=null&&localStorage.getItem("mypage")!=''){
@@ -254,7 +308,6 @@ function showsaveddata(){
 		alert('Your broswer does not support this function');
 	}
 }
-
 function showsaveddata2(){
 	if (typeof(Storage)!=="undefined"){
 		if (localStorage.getItem("myprogress")!=null&&localStorage.getItem("myprogress")!=''){
@@ -269,7 +322,6 @@ function showsaveddata2(){
 		alert('Your broswer does not support this function');
 	}
 }
-
 function savepage(){
 	if (typeof(Storage)!=="undefined"){
 		// localStorage.setItem("mypage",document.getElementById("all").innerHTML);
@@ -280,7 +332,6 @@ function savepage(){
 		alert('Your broswer does not support this function');
 	}
 }
-
 function savepage2(){
 	if (typeof(Storage)!=="undefined"){
 		localStorage.setItem("myprogress",document.getElementById("all").innerHTML);
@@ -291,7 +342,6 @@ function savepage2(){
 		alert('Your broswer does not support this function');
 	}
 }
-
 function cleardata(){
 	if (typeof(Storage)!=="undefined"){
 		if (confirm('Are you sure to clear all data?')){
@@ -303,7 +353,6 @@ function cleardata(){
 		alert('Your broswer does not support this function');
 	}
 }
-
 function confirmtimetable(x){
 	if (x=='back'){
 		document.getElementById("startchoosing").hidden = false;
@@ -313,7 +362,6 @@ function confirmtimetable(x){
 		document.getElementById("showfinaldata").hidden = false;
 	}
 }
-
 function teacherchoosechange(x){
 	document.getElementById(x.options[x.selectedIndex].text+"timetable").style.display = "";
 	// alert(x.options[x.selectedIndex].text+"timetable");
@@ -323,7 +371,6 @@ function teacherchoosechange(x){
 			document.getElementById(tempteachername+"timetable").style.display = "none";
 	}
 }
-
 function showdata(){
 	var tempshowdata = '';
 	var count = 0;
@@ -331,13 +378,14 @@ function showdata(){
 	if (searchid!=null){
 		for (var j=0; j<document.getElementById("teachingplanlist").rows.length; j++){
 			for (var k=1; k<=5; k++){
-				if (document.getElementById("teachingplanlist").rows[j].cells[k].innerHTML==searchid && k<=4){
+				if (document.getElementById("teachingplanlist").rows[j].cells[k].innerHTML==searchid){ // && k<=4){
 					count++;
 					tempshowdata+=' '+document.getElementById("teachingplanlist").rows[j].cells[0].innerHTML+') '+document.getElementById("teachingplanlist").rows[j].cells[1].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[2].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[3].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[4].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[5].innerHTML; //childNodes[0].value+'\n';//+'<br>';
-				} else if (k==5 && document.getElementById("teachingplanlist").rows[j].cells[5].childNodes[0].value==searchid){
-					count++;
-					tempshowdata+=' '+document.getElementById("teachingplanlist").rows[j].cells[0].innerHTML+') '+document.getElementById("teachingplanlist").rows[j].cells[1].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[2].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[3].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[4].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[5].innerHTML; //childNodes[0].value+'\n';//+'<br>';
-				}
+				} 
+				// else if (k==5 && document.getElementById("teachingplanlist").rows[j].cells[5].childNodes[0].value==searchid){
+				// 	count++;
+				// 	tempshowdata+=' '+document.getElementById("teachingplanlist").rows[j].cells[0].innerHTML+') '+document.getElementById("teachingplanlist").rows[j].cells[1].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[2].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[3].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[4].innerHTML+' '+document.getElementById("teachingplanlist").rows[j].cells[5].innerHTML; //childNodes[0].value+'\n';//+'<br>';
+				// }
 			}
 		}
 		if (count==0){
@@ -349,7 +397,6 @@ function showdata(){
 		}
 	}
 }
-
 function preset(x,y){
 	if (x.innerHTML=="x"){
 		if (x.parentNode.childNodes[0].selectedIndex==0){
@@ -365,7 +412,6 @@ function preset(x,y){
 		x.parentNode.childNodes[0].style.visibility = "";
 	}
 }
-
 function findteachingplanid(x){
 	for (var j=0; j<document.getElementById('teachingplanlist').rows.length; j++){
 		var temp = document.getElementById('teachingplanlist').rows[j];
@@ -375,16 +421,13 @@ function findteachingplanid(x){
 		}
 	}
 }
-
 var oldindex = 0;
 function getoldindex(x){
 	oldindex = x.selectedIndex;
 }
-
 var teachingplanct = [];
 for (var j=0; j<500; j++)
 	teachingplanct[j]=[];
-
 function checktable(x,y){ 
 	var venueindex = document.getElementById('choosevenuepage').selectedIndex;
 	var table = x.parentNode.parentNode.parentNode;
@@ -408,7 +451,6 @@ function checktable(x,y){
 	// }
 	var dayofcell = x.parentNode.cellIndex-2;
 	var timeofcell = table.rows[x.parentNode.parentNode.rowIndex].cells[1].innerHTML;
-
 	if (oldindex>0){
 		teachingplanct[venueindex][oldindex]--;
 		var temptable = document.getElementById(x.options[oldindex].text.substring(0,x.options[oldindex].text.indexOf(" "))+"timetable");
@@ -447,7 +489,6 @@ function checktable(x,y){
 		temptable.rows[endpoint+1].cells[dayofcell].style.border = '4px solid #FFFFFF';
 		sorttable(temptable.rows[endpoint].cells[dayofcell],temptable);
 	}
-
 	for (var j=1; j<=9; j++){
 		var tempchecktime = table.rows[j].cells[1].innerHTML;
 		for (var k=2; k<=7; k++){
@@ -477,7 +518,6 @@ function checktable(x,y){
 	}
 	//document.getElementById('debug').innerHTML = teachingplanct;
 }
-
 function changetable(x){
 	for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
 			document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").hidden = true;
@@ -512,12 +552,10 @@ function changetable(x){
 		}
 	}
 }
-
 function changetableheader(x){
 	document.getElementById("tableheader").innerHTML=x.options[x.selectedIndex].text;
 	changetable(document.getElementById("tableheader").innerHTML);
 }
-
 function timecount(x){
 	if (x<10){
 		return '0'+x;
@@ -525,7 +563,6 @@ function timecount(x){
 		return x;
 	}
 }
-
 function nextpage(){
 	var wrong = false;
 	if (document.getElementById('startchoosing').hidden){
@@ -596,7 +633,6 @@ function nextpage(){
 		}
 	}
 }
-
 function comparetime(x,y){
 	var tempfromhour = parseInt(x[0]*10+x[1]);
 	var tempfromminute = parseInt(x[3]*10+x[4]);
@@ -615,8 +651,6 @@ function comparetime(x,y){
 	}
 	// if < return 0, > return 1, intercepted return 2
 }
-
-
 function sorttable(x,y){
 	var sortrownum = x.cellIndex;
 	for (var j=1; j<=x.parentNode.rowIndex-1; j++){
@@ -631,7 +665,6 @@ function sorttable(x,y){
 		}
 	}
 }
-
 function addtime(x){
 	var answer = prompt("Please input the time that are occupied","xx:xx-xx:xx");
 	if (answer!=null){
@@ -661,7 +694,6 @@ function addtime(x){
 		}
 	}
 }
-
 function refreashdroplist(x){
 	document.getElementById(x+"choose").options.length=0;
 	for (var j=0; j<document.getElementById(x+"list").rows.length; j++){
@@ -674,13 +706,11 @@ function refreashdroplist(x){
 		document.getElementById('choosevenuepage').innerHTML = document.getElementById("venuechoose").innerHTML;
 	}
 }
-
 function refresh(x){
 	for (var j=0; j<x.rows.length; j++){
 		x.rows[j].cells[0].innerHTML = j+1;
 	}
 }
-
 function add(s){
 	// alert(s);
 	if (s=='teachingplan'){
@@ -730,14 +760,12 @@ function add(s){
 		}
 	}
 }
-
 function deletetable(x,s){
 	var table = x.parentNode.parentNode.parentNode;
 	table.deleteRow(x.parentNode.parentNode.rowIndex);
 	refresh(table);
 	refreashdroplist(s);
 }
-
 function checkkey(e,x){
 	e.preventDefault();
 	if (e.keyCode == 13){
@@ -745,14 +773,12 @@ function checkkey(e,x){
 	}
 	showpage(x);
 }
-
 function checkkey2(e,x){
 	e.preventDefault();
 	if (e.keyCode == 13){
 		x.parentNode.innerHTML = x.value;
 	}
 }
-
 function showpage(x){
 	//document.getElementById(x+'listarea').hidden=!document.getElementById(x+'listarea').hidden;
 	if (x=='teacher'){
@@ -777,8 +803,6 @@ function showpage(x){
 		document.getElementById('teachingplanlistarea').hidden=false;
 	}
 }
-
-
 </script>
 </body>
 
