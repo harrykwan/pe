@@ -122,6 +122,9 @@ Teaching plan:
 <button onclick="showsaveddata2()" style="padding: 20px; border-radius: 50px;">Show Progress</button>
 <button onclick="cleardata()" style="padding: 20px; border-radius: 50px;">Clear all Data</button>
 <button onclick="nextpage()" style="padding: 20px; border-radius: 50px;">Done</button>
+<br><br>
+<button onclick="downloaddata()" style="padding: 20px; border-radius: 50px;">Export Data</button>
+<button onclick="readTextFile()" style="padding: 20px; border-radius: 50px;">Import Data</button>
 </div>
 
 <div id="startchoosing" hidden=true>
@@ -143,6 +146,7 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <button onclick="confirmtimetable('back')" style="padding: 20px; border-radius: 50px;">Back</button>
 </div>
 <div id="debug"></div>
+<input type="file" hidden="true" id="fileinput" onchange="importdata(this)">
 </div>
 <script>
 var colorlist = [];
@@ -355,6 +359,44 @@ function showsaveddata2(){
 		alert('Your broswer does not support this function');
 	}
 }
+
+function readTextFile(file)
+{	
+	// document.getElementById("fileinput").click();
+	importdata();
+}
+
+// function importdata(x){
+// 	alert('file:\\\\\\'+x.value);
+// 	if (x!=''){
+// 		var client = new XMLHttpRequest();
+// 		client.open('GET', 'file:///'+x.value);
+// 		client.onreadystatechange = function() {
+// 		  alert(client.responseText);
+// 		}
+// 		client.send();
+// 	}
+	
+// }
+
+function importdata(x){
+	var pastedata = prompt("Paste the data here.");
+	if (pastedata!=null&&pastedata!=''){
+		document.getElementById("datainput").innerHTML = pastedata;
+	}
+
+}
+
+function downloaddata(){
+    var elHtml = document.getElementById("datainput").innerHTML;
+    var link = document.createElement('a');
+    var mimeType = 'text/plain';
+    var filename = 'data.txt';
+    link.setAttribute('download', filename);
+    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
+    link.click(); 
+}
+
 function savepage(){
 	if (typeof(Storage)!=="undefined"){
 		// localStorage.setItem("mypage",document.getElementById("all").innerHTML);
