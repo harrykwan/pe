@@ -119,7 +119,7 @@ Teaching plan:
 <br><br>
 <button onclick="savepage()" style="padding: 20px; border-radius: 50px;">Save Data</button>
 <button onclick="showsaveddata()" style="padding: 20px; border-radius: 50px;">Show Saved Data</button>
-<button onclick="showsaveddata2()" style="padding: 20px; border-radius: 50px;">Show Progress</button>
+<!-- <button onclick="showsaveddata2()" style="padding: 20px; border-radius: 50px;">Show Progress</button> -->
 <button onclick="cleardata()" style="padding: 20px; border-radius: 50px;">Clear all Data</button>
 <button onclick="nextpage()" style="padding: 20px; border-radius: 50px;">Done</button>
 <br><br>
@@ -144,6 +144,7 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <select onchange="teacherchoosechange(this)" id="teacherchoose2"></select><br><br>
 <div id="showteachertimetablearea"></div><br><br>
 <button onclick="confirmtimetable('back')" style="padding: 20px; border-radius: 50px;">Back</button>
+<button onclick="showdata()" style="padding: 20px; border-radius: 50px;">Search</button>
 </div>
 <div id="debug"></div>
 <input type="file" hidden="true" id="fileinput" onchange="importdata(this)">
@@ -210,7 +211,7 @@ var optionlist = [];
 var generatedone = 0;
 function dfs(t,c,x,y,n){
 	// alert(x+' '+y+' '+n);
-	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"){
+	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false){
 		t.rows[x].cells[y].childNodes[0].options[n].selected = true;
 		t.rows[x].cells[y].style.backgroundColor = colorlist[n];
 		generatedone++;
@@ -225,21 +226,56 @@ function dfs(t,c,x,y,n){
 				// alert(t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[1].innerHTML);
 				if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[1].innerHTML=='x'&&t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].selectedIndex==0){
 					for (var jj=1; jj<t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].length; jj++){
-						if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
-							var singlelesson = false;
-							if (teachingplanct[c][optionlist[jj]]==1&&orderlistx[j]>1&&t.rows[orderlistx[j]-1].cells[orderlisty[k]].childNodes[0].selectedIndex!=optionlist[jj]){
-								for (var kk=1; kk<=tablexlength; kk++)
-									if (kk!=orderlistx[j]&&t.rows[kk].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj]){
-										singlelesson = true;
-										break;
-									}
-									alert(singlelesson);
-									if (singlelesson==false){
-										dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
-									}
+						var maxtogether = 0;
+						var together = 1;
+						var cellteacher = t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].text.substring(0,t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].text.indexOf(' '));
+						for (var kk=2; kk<tablexlength; kk++){
+							var upnode = t.rows[kk-1].cells[orderlisty[k]].childNodes[0];
+							var downnode = t.rows[kk].cells[orderlisty[k]].childNodes[0];
+							var uptext = upnode.options[upnode.selectedIndex].text;
+							var downtext = downnode.options[downnode.selectedIndex].text;
+							if (kk==orderlistx[j]){
+								if ((upnode.options[jj].disabled==true || uptext.substring(0,uptext.indexOf(' '))==cellteacher) && t.rows[kk-1].cells[orderlisty[k]].childNodes[1].innerHTML=='x'){
+									together++;
+								} else {
+									together = 1;
+								}
 							} else {
-								dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
-							}							
+								if ((upnode.options[jj].disabled==true || uptext.substring(0,uptext.indexOf(' '))==cellteacher) && (downnode.options[jj].disabled==true || downtext.substring(0,downtext.indexOf(' '))==cellteacher) && t.rows[kk].cells[orderlisty[k]].childNodes[1].innerHTML=='x'&&t.rows[kk-1].cells[orderlisty[k]].childNodes[1].innerHTML=='x'){
+									together++;
+								} else {
+									together = 1;
+								}
+							}
+							if (together>maxtogether)
+								maxtogether = together;
+						}
+						if (maxtogether<=3){
+							var checkcell,checkcell2,check1,check2;
+							if (t.id=="SPtable"&&orderlistx[j]==2){
+								checkcell = t.rows[1].cells[orderlisty[k]].childNodes[0];
+								checkcell2 = t.rows[2].cells[orderlisty[k]].childNodes[0];
+								check1 = checkcell.options[checkcell.selectedIndex].text.substring(0,checkcell.options[checkcell.selectedIndex].text.indexOf(' '));
+								check2 = checkcell2.options[optionlist[jj]].text.substring(0,checkcell2.options[optionlist[jj]].text.indexOf(' '));
+							}
+							if (!(t.id=="SPtable"&&orderlistx[j]==2&&check1==check2)){
+								if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
+									var singlelesson = false;
+									if ((teachingplanct[c][optionlist[jj]]==1&&orderlistx[j]>1&&t.rows[orderlistx[j]-1].cells[orderlisty[k]].childNodes[0].selectedIndex!=optionlist[jj])||t.id=="SPtable"&&orderlistx[j]>1){
+										for (var kk=1; kk<=tablexlength; kk++)
+											if (kk!=orderlistx[j]&&t.rows[kk].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj]){
+												singlelesson = true;
+												break;
+											}
+											// alert(singlelesson);
+											if (singlelesson==false){
+												dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
+											}
+									} else {
+										dfs(t,c,orderlistx[j],orderlisty[k],optionlist[jj]);
+									}							
+								}
+							}
 						}
 					}
 				}
@@ -248,7 +284,7 @@ function dfs(t,c,x,y,n){
 		if (generatedone==(t.rows[1].cells[2].childNodes[0].length-1)*2){
 			return;
 		}
-		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"){
+		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false){
 			teachingplanct[c][n]--;
 			generatedone--;
 			t.rows[x].cells[y].style.backgroundColor = "black";
@@ -259,6 +295,16 @@ function dfs(t,c,x,y,n){
 	}
 	
 }
+
+function findgender(x){
+	var table = document.getElementById("teachingplanlist");
+	for (var j=0; j<table.rows.length; j++){
+		if (table.rows[j].cells[5].innerHTML == x){
+			return table.rows[j].cells[4].innerHTML;
+		}
+	}
+}
+
 function generate(){
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
@@ -276,14 +322,36 @@ function generate(){
 		generatedone = 0;
 		var tempselect = table.rows[1].cells[2].childNodes[0];
 		var templist = [];
+		var genderorder='Male';
+		var divnum=1;
+		// if (table.id=="SPtable"){
+		// 	divnum = 3;
+		// } else {
+		// 	divnum = 4;
+		// }
+		if (parseInt(j/divnum)%2==0){
+			genderorder = 'Male';
+		} else {
+			genderorder = 'Female';
+		}
 		for (var j=0; j<tempselect.length; j++){
 			templist[j] = tempselect.options[j].text.substring(0,tempselect.options[j].text.indexOf(" "));
 			optionlist[j] = j;
 		}
 		for (var j=1; j<tempselect.length-1; j++){
 			var different = j+1;
-			while (templist[j]==templist[different]&&different<tempselect.length-1)
+			var cannotfind = true;
+			while (templist[j]==templist[different]&&findgender(templist[j])!=genderorder&&different<tempselect.length-1){
+				if (templist[j]==templist[different]&&findgender(templist[j])!=genderorder)
+					cannotfind = false;
 				different++;
+			}
+			if (cannotfind){
+				different = j+1;
+				while (templist[j]==templist[different]&&different<tempselect.length-1){
+					different++;
+				}
+			}
 			var tempswap = templist[j+1];
 			templist[j+1] = templist[different];
 			templist[different] = tempswap;
@@ -326,6 +394,7 @@ function generate(){
 					}
 				}
 			}
+			alert('Done!');
 		} else {
 			alert("There is no solution, please swap the previous timetable.");
 		}
@@ -338,6 +407,7 @@ function showsaveddata(){
 			document.getElementById("datainput").innerHTML = localStorage.getItem("mypage");
 			// alert('Data found');
 			//alert(localStorage.getItem("mypage"));
+			document.getElementById('choosevenuepage').innerHTML = document.getElementById("venuechoose").innerHTML;
 		} else {
 			alert('Data not found');
 		}
@@ -383,6 +453,7 @@ function importdata(x){
 	var pastedata = prompt("Paste the data here.");
 	if (pastedata!=null&&pastedata!=''){
 		document.getElementById("datainput").innerHTML = pastedata;
+		document.getElementById('choosevenuepage').innerHTML = document.getElementById("venuechoose").innerHTML;
 	}
 
 }
@@ -596,7 +667,8 @@ function checktable(x,y){
 }
 function changetable(x){
 	for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
-			document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").hidden = true;
+		// alert(document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table"));
+		document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").hidden = true;
 	}
 	document.getElementById(x+"table").hidden=false;
 	var table = document.getElementById(x+"table");
@@ -676,7 +748,7 @@ function nextpage(){
 						}
 					}
 					for (var jj=1; jj<=9; jj++){
-						table += '<tr><th>'+jj+'</th><th>'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
+						table += '<tr><th>'+jj+'</th><th onclick="changetime(this)">'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
 						for (kk=1; kk<=6; kk++){
 							table += '<th><select onclick="getoldindex(this)" onchange="checktable(this,&quot;'+x+'&quot;)" style="width: 100px;" id="'+x+''+jj+''+kk+'">'+tempoption+'</select><button onclick="preset(this,&quot;'+x+'&quot;)">x</button></th>';
 						}
@@ -699,6 +771,24 @@ function nextpage(){
 			document.getElementById("timetablearea").innerHTML = table;
 			document.getElementById('datainput').hidden=!document.getElementById('datainput').hidden;
 			document.getElementById('startchoosing').hidden=!document.getElementById('startchoosing').hidden;
+			if (document.getElementById("SPtable")){
+				var sptable = document.getElementById("SPtable");
+				sptable.rows[1].cells[1].innerHTML = '09:00-10:09';
+				sptable.rows[2].cells[1].innerHTML = '09:00-10:09';
+				sptable.rows[3].cells[1].innerHTML = '10:10-11:20';
+				sptable.rows[4].cells[1].innerHTML = '11:30-12:39';
+				sptable.rows[5].cells[1].innerHTML = '12:40-13:49';
+				sptable.rows[6].cells[1].innerHTML = '13:50-14:59';
+				sptable.rows[7].cells[1].innerHTML = '15:00-16:10';
+				// sptable.rows[7].style.display = "none";
+				sptable.rows[8].style.display = "none";
+				sptable.rows[9].style.display = "none";
+				for (var j=8; j<=9; j++){
+					for (var k=2; k<=7; k++){
+						sptable.rows[j].cells[k].childNodes[1].click();
+					}
+				}
+			}
 			changetableheader(document.getElementById("choosevenuepage"));
 			teacherchoosechange(document.getElementById("teacherchoose2"));
 		}	
@@ -709,6 +799,18 @@ function nextpage(){
 		}
 	}
 }
+
+function changetime(x){
+	var asktime = prompt("Please enter the time you want to change to.","xx:xx-xx:xx");
+	if (asktime!=null&&asktime!=''){
+		if (asktime[2]==':'&&asktime[8]==':'&&asktime[5]=='-'){
+			x.innerHTML = asktime;
+		} else {
+			alert('Wrong Format.');
+		}
+	}
+}
+
 function comparetime(x,y){
 	var tempfromhour = parseInt(x[0]*10+x[1]);
 	var tempfromminute = parseInt(x[3]*10+x[4]);
