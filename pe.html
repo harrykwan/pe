@@ -235,13 +235,13 @@ function dfs(t,c,x,y,n){
 							var uptext = upnode.options[upnode.selectedIndex].text;
 							var downtext = downnode.options[downnode.selectedIndex].text;
 							if (kk==orderlistx[j]){
-								if ((upnode.options[jj].disabled==true || uptext.substring(0,uptext.indexOf(' '))==cellteacher) && t.rows[kk-1].cells[orderlisty[k]].childNodes[1].innerHTML=='x'){
+								if ((upnode.options[optionlist[jj]].disabled==true || uptext.substring(0,uptext.indexOf(' '))==cellteacher) && t.rows[kk-1].cells[orderlisty[k]].childNodes[1].innerHTML=='x'){
 									together++;
 								} else {
 									together = 1;
 								}
 							} else {
-								if ((upnode.options[jj].disabled==true || uptext.substring(0,uptext.indexOf(' '))==cellteacher) && (downnode.options[jj].disabled==true || downtext.substring(0,downtext.indexOf(' '))==cellteacher) && t.rows[kk].cells[orderlisty[k]].childNodes[1].innerHTML=='x'&&t.rows[kk-1].cells[orderlisty[k]].childNodes[1].innerHTML=='x'){
+								if ((upnode.options[optionlist[jj]].disabled==true || uptext.substring(0,uptext.indexOf(' '))==cellteacher) && (downnode.options[optionlist[jj]].disabled==true || downtext.substring(0,downtext.indexOf(' '))==cellteacher) && t.rows[kk].cells[orderlisty[k]].childNodes[1].innerHTML=='x'&&t.rows[kk-1].cells[orderlisty[k]].childNodes[1].innerHTML=='x'){
 									together++;
 								} else {
 									together = 1;
