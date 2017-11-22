@@ -229,7 +229,7 @@ function dfs(t,c,x,y,n){
 						var maxtogether = 0;
 						var together = 1;
 						var cellteacher = t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].text.substring(0,t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].text.indexOf(' '));
-						for (var kk=2; kk<tablexlength; kk++){
+						for (var kk=2; kk<=tablexlength; kk++){
 							var upnode = t.rows[kk-1].cells[orderlisty[k]].childNodes[0];
 							var downnode = t.rows[kk].cells[orderlisty[k]].childNodes[0];
 							var uptext = upnode.options[upnode.selectedIndex].text;
@@ -780,6 +780,14 @@ function nextpage(){
 				sptable.rows[5].cells[1].innerHTML = '12:40-13:49';
 				sptable.rows[6].cells[1].innerHTML = '13:50-14:59';
 				sptable.rows[7].cells[1].innerHTML = '15:00-16:10';
+
+				sptable.rows[1].cells[0].innerHTML = 1;
+				sptable.rows[2].cells[0].innerHTML = 1;
+				sptable.rows[3].cells[0].innerHTML = 2;
+				sptable.rows[4].cells[0].innerHTML = 3;
+				sptable.rows[5].cells[0].innerHTML = 4;
+				sptable.rows[6].cells[0].innerHTML = 5;
+				sptable.rows[7].cells[0].innerHTML = 6;
 				// sptable.rows[7].style.display = "none";
 				sptable.rows[8].style.display = "none";
 				sptable.rows[9].style.display = "none";
