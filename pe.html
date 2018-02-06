@@ -79,7 +79,8 @@ Teaching plan:
 <select onclick="showpage('teachingplan')" id="teacherchoose"></select>
 <select onclick="showpage('teachingplan')" id="venuechoose"></select>
 <select onclick="showpage('teachingplan')" id="sportschoose"></select>
-<select onclick="showpage('teachingplan')" id="genderchoose"><option>Male</option><option>Female</option></select>
+<select onclick="showpage('teachingplan')" id="genderchoose"><option>Male</option><option>Female</option><option>Mix</option></select>
+<select onclick="showpage('teachingplan')" id="languagechoose"><option>C</option><option>E</option><option>P</option></select>
 <input type="number" onclick="showpage('teachingplan')" id="quantitychoose" value="1"> </input>
 <button id='teachingplanadd' onclick="add('teachingplan')">add</button>
 <br><br>
@@ -182,7 +183,6 @@ colorlist[27] = "black";
 colorlist[28] = "black";
 colorlist[29] = "black";
 colorlist[30] = "black";
-
 var orderlistx = [];
 orderlistx[1] = 1;
 orderlistx[2] = 2;
@@ -193,7 +193,6 @@ orderlistx[6] = 6;
 orderlistx[7] = 7;
 orderlistx[8] = 8;
 orderlistx[9] = 9;
-
 var orderlisty = [];
 orderlisty[2] = 2;
 orderlisty[3] = 6;
@@ -202,12 +201,9 @@ orderlisty[5] = 4;
 orderlisty[6] = 5;
 orderlisty[7] = 7;
 // orderlisty[8] = 8;
-
 var tablexlength = 8;
 var tableylength = 6;
-
 var optionlist = [];
-
 var generatedone = 0;
 function dfs(t,c,x,y,n){
 	// alert(x+' '+y+' '+n);
@@ -295,7 +291,6 @@ function dfs(t,c,x,y,n){
 	}
 	
 }
-
 function findgender(x){
 	var table = document.getElementById("teachingplanlist");
 	for (var j=0; j<table.rows.length; j++){
@@ -304,7 +299,6 @@ function findgender(x){
 		}
 	}
 }
-
 function generate(){
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
@@ -429,13 +423,11 @@ function showsaveddata2(){
 		alert('Your broswer does not support this function');
 	}
 }
-
 function readTextFile(file)
 {	
 	// document.getElementById("fileinput").click();
 	importdata();
 }
-
 // function importdata(x){
 // 	alert('file:\\\\\\'+x.value);
 // 	if (x!=''){
@@ -448,16 +440,13 @@ function readTextFile(file)
 // 	}
 	
 // }
-
 function importdata(x){
 	var pastedata = prompt("Paste the data here.");
 	if (pastedata!=null&&pastedata!=''){
 		document.getElementById("datainput").innerHTML = pastedata;
 		document.getElementById('choosevenuepage').innerHTML = document.getElementById("venuechoose").innerHTML;
 	}
-
 }
-
 function downloaddata(){
     var elHtml = document.getElementById("datainput").innerHTML;
     var link = document.createElement('a');
@@ -467,7 +456,6 @@ function downloaddata(){
     link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
     link.click(); 
 }
-
 function savepage(){
 	if (typeof(Storage)!=="undefined"){
 		// localStorage.setItem("mypage",document.getElementById("all").innerHTML);
@@ -780,7 +768,6 @@ function nextpage(){
 				sptable.rows[5].cells[1].innerHTML = '12:40-13:49';
 				sptable.rows[6].cells[1].innerHTML = '13:50-14:59';
 				sptable.rows[7].cells[1].innerHTML = '15:00-16:10';
-
 				sptable.rows[1].cells[0].innerHTML = 1;
 				sptable.rows[2].cells[0].innerHTML = 1;
 				sptable.rows[3].cells[0].innerHTML = 2;
@@ -807,7 +794,6 @@ function nextpage(){
 		}
 	}
 }
-
 function changetime(x){
 	var asktime = prompt("Please enter the time you want to change to.","xx:xx-xx:xx");
 	if (asktime!=null&&asktime!=''){
@@ -818,7 +804,6 @@ function changetime(x){
 		}
 	}
 }
-
 function comparetime(x,y){
 	var tempfromhour = parseInt(x[0]*10+x[1]);
 	var tempfromminute = parseInt(x[3]*10+x[4]);
@@ -914,10 +899,12 @@ function add(s){
 				var cell4 = row.insertCell(4);
 				var cell5 = row.insertCell(5);
 				var cell6 = row.insertCell(6);
+				var cell7 = row.insertCell(7);
 				cell1.innerHTML = document.getElementById("teacherchoose").options[document.getElementById("teacherchoose").selectedIndex].text;
 				cell2.innerHTML = document.getElementById("venuechoose").options[document.getElementById("venuechoose").selectedIndex].text;
 				cell3.innerHTML = document.getElementById("sportschoose").options[document.getElementById("sportschoose").selectedIndex].text;
-				cell6.innerHTML = "<button onclick='deletetable(this,&quot;"+s+"&quot;)'>x</button>";
+				cell6.innerHTML = document.getElementById("languagechoose").options[document.getElementById("languagechoose").selectedIndex].text;
+				cell7.innerHTML = "<button onclick='deletetable(this,&quot;"+s+"&quot;)'>x</button>";
 				if (document.getElementById("genderchoose").selectedIndex==0){
 					cell4.innerHTML = "Male";
 				} else {
