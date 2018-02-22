@@ -529,8 +529,9 @@ function generate(){
 						var coursecode = x.options[x.selectedIndex].text.substring(x.options[x.selectedIndex].text.indexOf(" ")+1, x.options[x.selectedIndex].text.length);
 						// alert(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" ")));
 						var endpoint = 1;
-						while (temptable.rows[endpoint].cells[dayofcell].innerHTML!='+')
+						while (temptable.rows[endpoint].cells[dayofcell].innerHTML!='+'){
 							endpoint++;
+						}
 						// alert(endpoint);
 						temptable.rows[endpoint].cells[dayofcell].innerHTML = timeofcell+' '+coursecode;
 						temptable.rows[endpoint+1].cells[dayofcell].innerHTML = "+";
