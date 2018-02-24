@@ -113,6 +113,9 @@
 	function translatedata(){
 		var finaldata = "";
 			var x1 = document.getElementById("codeinputhere").value.split("\n");
+			for (var j=0; j<x1.length; j++){
+				x1[j] = x1[j].substring(4,x1[j].length);
+			}
 			var codearray = x1;
 			// document.getElementById("codeoutput").innerHTML = repeatdata(codearray) +'<br>';
 
@@ -153,7 +156,7 @@
 
 			var x3 = document.getElementById("teacherinputhere").value.split("\n");
 			for (var j=0; j<x3.length; j++){
-				x3[j] = x3[j].substring(2,x3[j].length);
+				x3[j] = x3[j].substring(5,x3[j].length);
 				for (var k=0; k<x3[j].length; k++){
 					if (x3[j][k]==' '){
 						x3[j] = x3[j].substring(0,k)+'_'+x3[j].substring(k+1,x3[j].length);
