@@ -728,9 +728,9 @@ function getoldindex(x){
 var teachingplanct = [];
 for (var j=0; j<500; j++)
 	teachingplanct[j]=[];
-function checktable(x,y){ 
+function checktable(x,y){
 	var venueindex = document.getElementById('choosevenuepage').selectedIndex;
-	var table = x.parentNode.parentNode.parentNode;
+	var table = x.parentNode.parentNode.parentNode.parentNode;
 	x.parentNode.style.backgroundColor = colorlist[x.selectedIndex];
 	//x.options[0].disabled = true;
 	// var teachingplanct = [];
@@ -918,7 +918,7 @@ function nextpage(){
 								}
 								
 								for (kk=1; kk<=6; kk++){
-									table += '<th><select onclick="getoldindex(this)" onchange="checktable(this,&quot;'+x+'&quot;)" style="width: 100px;" id="'+x+''+jj+''+kk+'">'+tempoption+'</select><button onclick="preset(this,&quot;'+x+'&quot;)">x</button></th>';
+									table += '<th><select onclick="getoldindex(this)" onchange="checktable(this,&quot;'+x+'&quot;)" style="width: 150px;" id="'+x+''+jj+''+kk+'">'+tempoption+'</select><button onclick="preset(this,&quot;'+x+'&quot;)">x</button></th>';
 								}
 								table += '</tr>';
 							}
@@ -929,7 +929,7 @@ function nextpage(){
 						for (var jj=1; jj<=9; jj++){
 							table += '<tr><th>'+jj+'</th><th onclick="changetime(this)">'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
 							for (kk=1; kk<=6; kk++){
-								table += '<th><select onclick="getoldindex(this)" onchange="checktable(this,&quot;'+x+'&quot;)" style="width: 100px;" id="'+x+''+jj+''+kk+'">'+tempoption+'</select><button onclick="preset(this,&quot;'+x+'&quot;)">x</button></th>';
+								table += '<th><select onclick="getoldindex(this)" onchange="checktable(this,&quot;'+x+'&quot;)" style="width: 140px;" id="'+x+''+jj+''+kk+'">'+tempoption+'</select><button onclick="preset(this,&quot;'+x+'&quot;)">x</button></th>';
 							}
 							table += '</tr>';
 						}
