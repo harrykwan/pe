@@ -155,13 +155,20 @@
 			// document.getElementById("titleoutput").innerHTML = repeatdata(sportsarray)+'br';
 
 			var x3 = document.getElementById("teacherinputhere").value.split("\n");
+			// var firstspace = 1;
 			for (var j=0; j<x3.length; j++){
-				x3[j] = x3[j].substring(5,x3[j].length);
-				for (var k=0; k<x3[j].length; k++){
-					if (x3[j][k]==' '){
-						x3[j] = x3[j].substring(0,k)+'_'+x3[j].substring(k+1,x3[j].length);
-					}
-				}
+				x3[j] = x3[j].substring(2,x3[j].length);
+				x3[j] = x3[j].substring(x3[j].indexOf(' '),x3[j].length);
+				// for (var k=0; k<x3[j].length; k++){
+				// 	if (x3[j][k]==' '){
+				// 		if (firstspace == 1){
+				// 			firstspace = 0;
+				// 			x3[j] = x3[j].substring(k+1,x3[j].length);
+				// 		} else {
+				// 			x3[j] = x3[j].substring(0,k)+'_'+x3[j].substring(k+1,x3[j].length);
+				// 		}
+				// 	}
+				// }
 				// document.getElementById("teacheroutput").innerHTML += x[j]+'<br>';
 				// alert(x3[j]);
 			}
