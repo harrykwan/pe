@@ -302,6 +302,49 @@ function dfs(t,c,x,y,n){
 									maxtogether = together;
 							}
 							// alert(maxtogether);
+						} if (t.id=='LNtable'){
+							// alert('length = '+tablexlength);
+							for (var kk=2; kk<=tablexlength/2; kk++){
+								var upnode1 = t.rows[((kk-1)-1)*2+1].cells[orderlisty[k]].childNodes[0];
+								var upnode2 = t.rows[((kk-1)-1)*2+2].cells[orderlisty[k]].childNodes[0];
+								var downnode1 = t.rows[((kk)-1)*2+1].cells[orderlisty[k]].childNodes[0];
+								var downnode2 = t.rows[((kk)-1)*2+2].cells[orderlisty[k]].childNodes[0];
+								var uptext1 = upnode1.options[upnode1.selectedIndex].text;
+								var uptext2 = upnode2.options[upnode2.selectedIndex].text;
+								var downtext1 = downnode1.options[downnode1.selectedIndex].text;
+								var downtext2 = downnode2.options[downnode2.selectedIndex].text;
+								if (((kk)-1)*2+1==orderlistx[j]||((kk)-1)*2+2==orderlistx[j]){
+									if (upnode1.options[optionlist[jj]].disabled==true 
+										|| uptext1.substring(0,uptext1.indexOf(' '))==cellteacher
+										|| uptext2.substring(0,uptext2.indexOf(' '))==cellteacher){
+										together++;
+									} else {
+										together = 1;
+									}
+								} else if (((kk-1)-1)*2+1==orderlistx[j]||((kk-1)-1)*2+2==orderlistx[j]){
+									if (downnode1.options[optionlist[jj]].disabled==true 
+										|| downtext1.substring(0,downtext1.indexOf(' '))==cellteacher
+										|| downtext2.substring(0,downtext2.indexOf(' '))==cellteacher){
+										together++;  
+									} else {
+										together = 1;
+									}
+								} else {
+									if ((downnode1.options[optionlist[jj]].disabled==true 
+										|| downtext1.substring(0,downtext1.indexOf(' '))==cellteacher
+										|| downtext2.substring(0,downtext2.indexOf(' '))==cellteacher)&&
+										((upnode1.options[optionlist[jj]].disabled==true 
+										|| uptext1.substring(0,uptext1.indexOf(' '))==cellteacher
+										|| uptext2.substring(0,uptext2.indexOf(' '))==cellteacher))){
+										together++;
+									} else {
+										together = 1;
+									}
+								}
+								if (together>maxtogether)
+									maxtogether = together;
+							}
+							// alert(maxtogether);
 						} else {
 							together = 1;
 							for (var kk=2; kk<=tablexlength; kk++){
@@ -354,7 +397,27 @@ function dfs(t,c,x,y,n){
 								hcfcheck3 = hcfcheckcell3.options[hcfcheckcell3.selectedIndex].text.substring(0,hcfcheckcell3.options[hcfcheckcell3.selectedIndex].text.indexOf(' '));
 								// alert(hcflocation+' '+hcfcheck1+' '+hcfcheck2+' '+hcfcheck3);
 							}
-							if (!((t.id=="SPtable"&&(check1==cellteacher||check2==cellteacher))||(t.id=="HCFtable"&&(hcfcheck1==cellteacher||hcfcheck2==cellteacher||hcfcheck1==cellteacher)))){
+							var lncheckcell1,lncheckcell2,lncheck1,lncheck2,lnpass=0;
+							if (t.id=="LNtable"){
+								var lnlocation = Math.floor((orderlistx[j]-1)/2)+1;
+								// alert('hcflocation: '+hcflocation);
+									lncheckcell1 = t.rows[(lnlocation-1)*2+1].cells[orderlisty[k]].childNodes[0];
+									lncheckcell2 = t.rows[(lnlocation-1)*2+2].cells[orderlisty[k]].childNodes[0];
+
+								lncheck1 = lncheckcell1.options[lncheckcell1.selectedIndex].text.substring(0,lncheckcell1.options[lncheckcell1.selectedIndex].text.indexOf(' '));
+								lncheck2 = lncheckcell2.options[lncheckcell2.selectedIndex].text.substring(0,lncheckcell2.options[lncheckcell2.selectedIndex].text.indexOf(' '));
+								lncheck11 = lncheckcell1.options[lncheckcell1.selectedIndex].text.substring(lncheckcell1.options[lncheckcell1.selectedIndex].text.indexOf(' '),lncheckcell1.options[lncheckcell1.selectedIndex].text.indexOf(' ')+4);
+								lncheck22 = lncheckcell2.options[lncheckcell2.selectedIndex].text.substring(lncheckcell2.options[lncheckcell2.selectedIndex].text.indexOf(' '),lncheckcell2.options[lncheckcell2.selectedIndex].text.indexOf(' ')+4);
+								if (lncheck1!=''&&lncheck2!=''&&lncheck11=='1026'&&lncheck22=='1026'){
+									lnpass = 1;
+								} else if (lncheck1!=''&&lncheck2!=''){
+									lnpass = 0;
+								} else {
+									lnpass = 1;
+								}
+								// alert(hcflocation+' '+hcfcheck1+' '+hcfcheck2+' '+hcfcheck3);
+							}
+							if (!((t.id=="SPtable"&&(check1==cellteacher||check2==cellteacher))||(t.id=="HCFtable"&&(hcfcheck1==cellteacher||hcfcheck2==cellteacher||hcfcheck1==cellteacher))||(t.id=="LNtable"&&(lncheck1==cellteacher||lncheck2==cellteacher)&&lnpass==1))){
 								if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
 									var singlelesson = false;
 									if (teachingplanct[c][optionlist[jj]]==1){
@@ -364,6 +427,16 @@ function dfs(t,c,x,y,n){
 													(t.rows[(kk-1)*3+1].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj]
 													||t.rows[(kk-1)*3+2].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj]
 													||t.rows[(kk-1)*3+3].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj])){
+													singlelesson = true;
+													break;
+												}
+												// alert('kk: '+kk);
+											}
+										} else if (t.id=="LNtable"){
+											for (var kk=1; kk<=tablexlength/2; kk++){
+												if (kk!=Math.floor((orderlistx[j]-1)/2)+1&&kk-1!=Math.floor((orderlistx[j]-1)/2)+1&&kk+1!=Math.floor((orderlistx[j]-1)/2)+1&&
+													(t.rows[(kk-1)*2+1].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj]
+													||t.rows[(kk-1)*2+2].cells[orderlisty[k]].childNodes[0].selectedIndex==optionlist[jj])){
 													singlelesson = true;
 													break;
 												}
@@ -446,6 +519,13 @@ function generate(){
 			for (var j=1; j<=3; j++){
 				for (var k=1; k<=8; k++){
 					orderlistx[(j-1)*8+k] = (k-1)*3+j;
+				}
+			}
+		} else if (table.id=="LNtable"){
+			tablexlength = 16;
+			for (var j=1; j<=2; j++){
+				for (var k=1; k<=8; k++){
+					orderlistx[(j-1)*8+k] = (k-1)*2+j;
 				}
 			}
 		} else {
@@ -793,6 +873,9 @@ function checktable(x,y){
 	if (table.id=='HCFtable'){
 		checktablelengthx = 27;
 	}
+	if (table.id=='LNtable'){
+		checktablelengthx = 18;
+	}
 	for (var j=1; j<=checktablelengthx; j++){
 		var tempchecktime = table.rows[j].cells[1].innerHTML;
 		for (var k=2; k<=7; k++){
@@ -831,7 +914,10 @@ function changetable(x){
 	var table = document.getElementById(x+"table");
 	var changetablelengthx = 9;
 	if (table.id=="HCFtable"){
-		changetablelengthx = 27
+		changetablelengthx = 27;
+	}
+	if (table.id=="LNtable"){
+		changetablelengthx = 18;
 	}
 	for (var j=1; j<=changetablelengthx; j++){
 		var tempchecktime = table.rows[j].cells[1].innerHTML;
@@ -911,6 +997,23 @@ function nextpage(){
 					if (x=='HCF'){
 						for (var jj=1; jj<=9; jj++){
 							for (var jjj=1; jjj<=3; jjj++){
+								if (jjj==1){
+									table += '<tr><th>'+jj+'</th><th onclick="changetime(this)">'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
+								} else {
+									table += '<tr><th>'+'</th><th style="color: black" onclick="changetime(this)">'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
+								}
+								
+								for (kk=1; kk<=6; kk++){
+									table += '<th><select onclick="getoldindex(this)" onchange="checktable(this,&quot;'+x+'&quot;)" style="width: 150px;" id="'+x+''+jj+''+kk+'">'+tempoption+'</select><button onclick="preset(this,&quot;'+x+'&quot;)">x</button></th>';
+								}
+								table += '</tr>';
+							}
+							
+						}
+						table+='</table>';
+					} else if (x=='LN'){
+						for (var jj=1; jj<=9; jj++){
+							for (var jjj=1; jjj<=2; jjj++){
 								if (jjj==1){
 									table += '<tr><th>'+jj+'</th><th onclick="changetime(this)">'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
 								} else {
