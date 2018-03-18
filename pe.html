@@ -137,8 +137,9 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <button onclick="nextpage()" style="padding: 20px; border-radius: 50px;">Back</button>
 <!-- <button onclick="savepage2()" style="padding: 20px; border-radius: 50px;">Save Progress</button> -->
 <button onclick="showdata()" style="padding: 20px; border-radius: 50px;">Search</button>
-<button onclick="confirmtimetable()" style="padding: 20px; border-radius: 50px;">Sort by Teachers</button>	
+<button onclick="confirmtimetable()" style="padding: 20px; border-radius: 50px;">Sort by Teachers</button>
 <button onclick="generate()" style="padding: 20px; border-radius: 50px;">Generate Time Table</button>
+<button onclick="cleartable()" style="padding: 20px; border-radius: 50px;">Clear All</button>
 <br><div id="showprogress"></div>	
 <div id="showdataarea"></div>
 </div>
@@ -399,6 +400,9 @@ function dfs(t,c,x,y,n){
 							}
 							var lncheckcell1,lncheckcell2,lncheck1,lncheck2,lnpass=0;
 							if (t.id=="LNtable"){
+								var nowchoose = t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].text;
+								nowchoose = nowchoose.substring(nowchoose.length-5,nowchoose.length-1);
+								// alert(nowchoose);
 								var lnlocation = Math.floor((orderlistx[j]-1)/2)+1;
 								// alert('hcflocation: '+hcflocation);
 									lncheckcell1 = t.rows[(lnlocation-1)*2+1].cells[orderlisty[k]].childNodes[0];
@@ -406,18 +410,20 @@ function dfs(t,c,x,y,n){
 
 								lncheck1 = lncheckcell1.options[lncheckcell1.selectedIndex].text.substring(0,lncheckcell1.options[lncheckcell1.selectedIndex].text.indexOf(' '));
 								lncheck2 = lncheckcell2.options[lncheckcell2.selectedIndex].text.substring(0,lncheckcell2.options[lncheckcell2.selectedIndex].text.indexOf(' '));
-								lncheck11 = lncheckcell1.options[lncheckcell1.selectedIndex].text.substring(lncheckcell1.options[lncheckcell1.selectedIndex].text.indexOf(' '),lncheckcell1.options[lncheckcell1.selectedIndex].text.indexOf(' ')+4);
-								lncheck22 = lncheckcell2.options[lncheckcell2.selectedIndex].text.substring(lncheckcell2.options[lncheckcell2.selectedIndex].text.indexOf(' '),lncheckcell2.options[lncheckcell2.selectedIndex].text.indexOf(' ')+4);
-								if (lncheck1!=''&&lncheck2!=''&&lncheck11=='1026'&&lncheck22=='1026'){
-									lnpass = 1;
-								} else if (lncheck1!=''&&lncheck2!=''){
+								lncheck11 = lncheckcell1.options[lncheckcell1.selectedIndex].text.substring(lncheckcell1.options[lncheckcell1.selectedIndex].text.length-5,lncheckcell1.options[lncheckcell1.selectedIndex].text.length-1);
+								lncheck22 = lncheckcell2.options[lncheckcell2.selectedIndex].text.substring(lncheckcell2.options[lncheckcell2.selectedIndex].text.length-5,lncheckcell2.options[lncheckcell2.selectedIndex].text.length-1);
+								// alert(lncheck11+' | '+lncheck22+' | '+nowchoose);
+								if (lncheck1!=''||lncheck2!=''){
 									lnpass = 0;
+									if (lncheck11=='1026'&&nowchoose=='1026'||lncheck22=='1026'&&nowchoose=='1026')
+										lnpass = 1;
 								} else {
 									lnpass = 1;
 								}
+								// alert(lnpass);
 								// alert(hcflocation+' '+hcfcheck1+' '+hcfcheck2+' '+hcfcheck3);
 							}
-							if (!((t.id=="SPtable"&&(check1==cellteacher||check2==cellteacher))||(t.id=="HCFtable"&&(hcfcheck1==cellteacher||hcfcheck2==cellteacher||hcfcheck1==cellteacher))||(t.id=="LNtable"&&(lncheck1==cellteacher||lncheck2==cellteacher)&&lnpass==1))){
+							if (!((t.id=="SPtable"&&(check1==cellteacher||check2==cellteacher))||(t.id=="HCFtable"&&(hcfcheck1==cellteacher||hcfcheck2==cellteacher||hcfcheck1==cellteacher))||(t.id=="LNtable"&&(lncheck1==cellteacher||lncheck2==cellteacher||lnpass==0)))){
 								if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
 									var singlelesson = false;
 									if (teachingplanct[c][optionlist[jj]]==1){
@@ -500,6 +506,46 @@ function findgender(x){
 		}
 	}
 }
+
+function cleartable(){
+		var venueindex = document.getElementById('choosevenuepage').selectedIndex;
+		var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
+		for (var j=1; j<table.rows.length; j++){
+			for (var k=2; k<table.rows[j].cells.length; k++){
+				if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+					var thiscell = table.rows[j].cells[k].childNodes[0];
+					teachingplanct[venueindex][thiscell.selectedIndex]--;
+
+					var temptable = document.getElementById(thiscell.options[thiscell.selectedIndex].text.substring(0,thiscell.options[thiscell.selectedIndex].text.indexOf(" "))+"timetable");
+
+					var coursecode = thiscell.options[thiscell.selectedIndex].text.substring(thiscell.options[thiscell.selectedIndex].text.indexOf(" ")+1, thiscell.options[thiscell.selectedIndex].text.length);
+					// alert(temptable+' | '+coursecode);
+					var tempj = 1;
+					var dayofcell = k-2;
+					var timeofcell = table.rows[j].cells[1].innerHTML;
+					while (temptable.rows[tempj].cells[dayofcell].innerHTML!=timeofcell+' '+coursecode){
+						// alert(temptable.rows[tempj].cells[dayofcell].innerHTML+' '+timeofcell+' '+coursecode);
+						tempj++;
+					}
+					var ct = tempj;
+					// alert(ct);
+					while (temptable.rows[ct+1].cells[dayofcell].innerHTML!=""){
+						temptable.rows[ct].cells[dayofcell].innerHTML = temptable.rows[ct+1].cells[dayofcell].innerHTML
+						ct++;
+					}
+					if (ct>1){
+						temptable.rows[ct].cells[dayofcell].innerHTML = "";
+						// temptable.rows[ct].cells[x.cellIndex].style.display = "none";
+						temptable.rows[ct].cells[dayofcell].style.border = "0px";
+					}
+					thiscell.selectedIndex = 0;
+					thiscell.parentNode.style.backgroundColor = "black";
+				}
+			}
+		}	
+		alert('done');
+}
+
 function generate(){
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
