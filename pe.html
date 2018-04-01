@@ -214,10 +214,25 @@ var checkprogress = 0;
 var checkprogressdone = 0;
 var keepfail = 0;
 var middleout =0;
+var firstindfs = 0;
 function dfs(t,c,x,y,n){
 	// alert(x+' '+y+' '+n);
 	if (middleout) return;
-	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false){
+	var eighthalfpass = 1;
+	if (firstindfs==1){
+		var tempcellteacher = t.rows[x].cells[y].childNodes[0].options[n].text;
+		tempcellteacher = tempcellteacher.substring(0,tempcellteacher.indexOf(" "));
+		// alert(tempcellteacher+"timetable");
+		for (var j=0; j<=4; j++){
+			// alert(document.getElementById(tempcellteacher+"timetable").rows[1].cells[j].innerHTML.substring(0,5));
+			if (document.getElementById(tempcellteacher+"timetable").rows[1].cells[j].innerHTML.substring(0,5)=="08:30"){
+				eighthalfpass = 0;
+			}
+		}
+		firstindfs = 0;
+	}
+	// alert(eighthalfpass);
+	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1){
 		t.rows[x].cells[y].childNodes[0].options[n].selected = true;
 		t.rows[x].cells[y].style.backgroundColor = colorlist[n];
 		generatedone++;
@@ -259,11 +274,16 @@ function dfs(t,c,x,y,n){
 							var tempteachercell = document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML;
 							// alert(tempteachercell);
 							// alert(tempteachercell.substring(0,5));
-							if (tempteachercell.substring(0,5)=='08:30'||tempteachercell.substring(0,5)=='09:00'){
-								eighthalf++;
-							}
+							// if (tempteachercell.substring(0,5)=='08:30'){ //||tempteachercell.substring(0,5)=='09:00'){
+							// 	eighthalf++;
+							// }
 							if (tempteachercell.substring(tempteachercell.length-2,tempteachercell.length)!='NA'&&tempteachercell!='+'){
 								teacherdayct++;
+							}
+						}
+						for (var jjj=0; jjj<=4; jjj++){
+							if (document.getElementById(cellteacher+"timetable").rows[1].cells[jjj].innerHTML.substring(0,5)=='08:30'){
+								eighthalf++;
 							}
 						}
 						// alert(eighthalf);
@@ -417,6 +437,7 @@ function dfs(t,c,x,y,n){
 							if (eighthalf>0&&(orderlistx[j]==1)){
 								tooearly = 1;
 							}
+							// alert(tooearly);
 							together = 1;
 							for (var kk=2; kk<=tablexlength; kk++){
 								var upnode = t.rows[kk-1].cells[orderlisty[k]].childNodes[0];
@@ -595,7 +616,7 @@ function dfs(t,c,x,y,n){
 		if (generatedone==(t.rows[1].cells[2].childNodes[0].length-1)*2||middleout){
 			return;
 		}
-		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false){
+		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1){
 			teachingplanct[c][n]--;
 			generatedone--;
 			t.rows[x].cells[y].style.backgroundColor = "black";
@@ -787,6 +808,7 @@ function generate(){
 		while (generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2 && startoption<table.rows[1].cells[2].childNodes[0].length&&middleout==0){
 			// alert('start');		
 			keepfail = 0;
+			firstindfs = 1;
 			// setTimeout(gocheckprogress, 2000);
 			dfs(table,document.getElementById("choosevenuepage").selectedIndex,1,2,startoption);
 			// document.getElementById("debug").innerHTML = debug;
