@@ -235,6 +235,7 @@ function dfs(t,c,x,y,n){
 	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1){
 		t.rows[x].cells[y].childNodes[0].options[n].selected = true;
 		t.rows[x].cells[y].style.backgroundColor = colorlist[n];
+		// alert('i get in la');
 		generatedone++;
 		teachingplanct[c][n]++;
 	}
@@ -375,6 +376,7 @@ function dfs(t,c,x,y,n){
 									}
 								}
 							}
+							// alert(eighthalf);
 							if (eighthalf>0&&(orderlistx[j]==2||orderlistx[j]==1)){
 								tooearly = 1;
 							}
@@ -535,7 +537,7 @@ function dfs(t,c,x,y,n){
 								// alert(lnpass);
 								// alert(hcflocation+' '+hcfcheck1+' '+hcfcheck2+' '+hcfcheck3);
 							}
-							if (!((t.id=="SPtable"&&(check1==cellteacher||check2==cellteacher))||(t.id=="HCFtable"&&(hcfcheck1==cellteacher||hcfcheck2==cellteacher||hcfcheck1==cellteacher))||(t.id=="LNtable"&&(lncheck1==cellteacher||lncheck2==cellteacher||lnpass==1)))){
+							if (!((t.id=="SPtable"&&(check1==cellteacher||check2==cellteacher))||(t.id=="HCFtable"&&(hcfcheck1==cellteacher||hcfcheck2==cellteacher||hcfcheck1==cellteacher))||(t.id=="LNtable"&&(lncheck1==cellteacher||lncheck2==cellteacher||lnpass==0)))){
 								if (t.rows[orderlistx[j]].cells[orderlisty[k]].childNodes[0].options[optionlist[jj]].disabled==false&&teachingplanct[c][optionlist[jj]]<2){
 									var singlelesson = false;
 									if (teachingplanct[c][optionlist[jj]]==1){
@@ -813,6 +815,7 @@ function generate(){
 		}
 		var startoption = 1;
 		middleout = 0;
+		// alert(tablexlength);
 		while (generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2 && startoption<table.rows[1].cells[2].childNodes[0].length&&middleout==0){
 			// alert('start');		
 			keepfail = 0;
