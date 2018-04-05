@@ -144,6 +144,7 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <button onclick="showdata()" style="padding: 20px; border-radius: 50px;">Search</button>
 <button onclick="confirmtimetable()" style="padding: 20px; border-radius: 50px;">Sort by Teachers</button>
 <button onclick="generate()" style="padding: 20px; border-radius: 50px;">Generate Time Table</button>
+<button onclick="advancegenerate()" style="padding: 20px; border-radius: 50px;">Advance Generate</button>
 <button onclick="cleartable()" style="padding: 20px; border-radius: 50px;">Clear All</button>
 <button onclick="setorder()" style="padding: 20px; border-radius: 50px;">Set Order</button>
 <button onclick="printall()" style="padding: 20px; border-radius: 50px;">Save and Print</button>
@@ -212,6 +213,7 @@ orderlisty[5] = 4;
 orderlisty[6] = 5;
 orderlisty[7] = 7;
 // orderlisty[8] = 8;
+var advancegen = 0;
 var tablexlength = 8;
 var tableylength = 6;
 var optionlist = [];
@@ -253,13 +255,18 @@ function dfs(t,c,x,y,n){
 		if (checkprogress==1||keepfail>=1000){
 			keepfail = 0;
 			checkprogress = 0;
-			if (confirm('The Progress now is '+(generatedone/((t.rows[1].cells[2].childNodes[0].length-1)*2)*100)+'%, continue?')){
-				alert('OK, continue.');
-				checkprogressdone = 1;
-			} else {
-				alert('Quit at Progress '+(generatedone/((t.rows[1].cells[2].childNodes[0].length-1)*2)*100)+'%');
+			if (advancegen==1){
 				middleout = 1;
 				return;
+			} else {
+					if (confirm('The Progress now is '+(generatedone/((t.rows[1].cells[2].childNodes[0].length-1)*2)*100)+'%, continue?')){
+					alert('OK, continue.');
+					checkprogressdone = 1;
+				} else {
+					alert('Quit at Progress '+(generatedone/((t.rows[1].cells[2].childNodes[0].length-1)*2)*100)+'%');
+					middleout = 1;
+					return;
+				}
 			}
 		}
 		// for (var j=1; j<t.rows.length; j++){
@@ -693,7 +700,181 @@ function cleartable(){
 		alert('done');
 }
 
+function advancegenerate(){
+	advancegen = 1;
+	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
+	var pass = true;
+	for (var j=1; j<table.rows.length; j++){
+		for (var k=2; k<table.rows[j].cells.length; k++){
+			if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+				pass = false;
+				break;
+			}
+		}
+	}
+	if (pass == false){
+		alert("Please cancel all selected options in the table first.");
+	} else {
+		//seting the order list		
+		generatedone = 0;
+		var tempselect = table.rows[1].cells[2].childNodes[0];
+		var templist = [];
+		var genderorder='Male';
+		var divnum=1;
+		// if (table.id=="SPtable"){
+		// 	divnum = 3;
+		// } else {
+		// 	divnum = 4;
+		// }
+		if (parseInt(j/divnum)%2==0){
+			genderorder = 'Male';
+		} else {
+			genderorder = 'Female';
+		}
+		for (var j=0; j<tempselect.length; j++){
+			templist[j] = tempselect.options[j].text.substring(0,tempselect.options[j].text.indexOf(" "));
+			optionlist[j] = j;
+		}
+		for (var j=1; j<tempselect.length-1; j++){
+			var different = j+1;
+			var cannotfind = true;
+			while (templist[j]==templist[different]&&findgender(templist[j])!=genderorder&&different<tempselect.length-1){
+				if (templist[j]==templist[different]&&findgender(templist[j])!=genderorder)
+					cannotfind = false;
+				different++;
+			}
+			if (cannotfind){
+				different = j+1;
+				while (templist[j]==templist[different]&&different<tempselect.length-1){
+					different++;
+				}
+			}
+			var tempswap = templist[j+1];
+			templist[j+1] = templist[different];
+			templist[different] = tempswap;
+			var tempswap2 = optionlist[j+1];
+			optionlist[j+1] = optionlist[different];
+			optionlist[different] = tempswap2;
+		}
+		var startoption = 1;
+		middleout = 0;
+		// alert(tablexlength);
+		
+		for (var j1=2; j1<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j1++){
+			for (var j2=2; j2<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j2++){
+				if (j1!=j2){
+					for (var j3=2; j3<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j3++){
+						if (j2!=j3&&j3!=j1){
+							for (var j4=2; j4<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j4++){
+								if (j3!=j4&&j2!=j4&&j1!=j4){
+									for (var j5=2; j5<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j5++){
+										if (j4!=j5&&j3!=j5&&j2!=j5&&j1!=j5){
+											orderlisty[2] = j1;
+											orderlisty[3] = j2;
+											orderlisty[4] = j3;
+											orderlisty[5] = j4;
+											orderlisty[6] = j5;
+											keepfail = 0;
+											firstindfs = 1;
+											// alert(j1+' '+j2+' '+j3+' '+j4+' '+j5);
+											// setTimeout(gocheckprogress, 2000);
+											dfs(table,document.getElementById("choosevenuepage").selectedIndex,1,2,startoption);
+											// document.getElementById("debug").innerHTML = debug;
+										}
+									}
+								}
+								
+							}
+						}
+						
+					}
+				}
+				
+			}
+		}
+			
+
+
+		if (generatedone==(table.rows[1].cells[2].childNodes[0].length-1)*2||middleout==1){
+			//check
+			if (middleout){
+				var checktablelengthx = 9;
+				if (table.id=='HCFtable'){
+					checktablelengthx = 27;
+				}
+				if (table.id=='LNtable'){
+					checktablelengthx = 18;
+				}
+				var venueindex = document.getElementById('choosevenuepage').selectedIndex;
+				for (var j=1; j<=checktablelengthx; j++){
+					var tempchecktime = table.rows[j].cells[1].innerHTML;
+					for (var k=2; k<=7; k++){
+						var temptime = table.rows[j].cells[1].innerHTML;
+						var tempoption = table.rows[j].cells[k].childNodes[0];
+						//if (tempoption.selectedIndex==0){
+							for (var jj=1; jj<tempoption.options.length; jj++){
+								// var tempindex = findteachingplanid(tempoption.options[jj].text);
+								// if (teachingplanct[tempindex]>=2){
+								var tempteachertable = document.getElementById(tempoption.options[jj].text.substring(0,tempoption.options[jj].text.indexOf(' '))+"timetable");
+								var crashed = false;
+								for (var kk=1; tempteachertable.rows[kk].cells[k-2].innerHTML!='+'; kk++){
+									// alert(tempteachertable.rows[kk].cells[k-2].innerHTML+' '+tempchecktime+' '+comparetime(tempteachertable.rows[kk].cells[k-2].innerHTML,tempchecktime));
+									if (comparetime(tempteachertable.rows[kk].cells[k-2].innerHTML,tempchecktime)==2){
+										crashed = true;
+										break;
+									}
+								}
+								if (teachingplanct[venueindex][jj]>=2||crashed){
+									tempoption.options[jj].disabled = true;
+								} else {
+									tempoption.options[jj].disabled = false;
+								}
+							}
+						//}
+					}
+				}
+			} else {
+				for (var j=1; j<table.rows.length; j++){
+					for (var k=2; k<table.rows[j].cells.length; k++){
+						for (var jj=1; jj<table.rows[j].cells[k].childNodes[0].length; jj++)
+						table.rows[j].cells[k].childNodes[0].options[jj].disabled = true;
+					}
+				}
+			}
+			for (var j=1; j<table.rows.length; j++){
+				for (var k=2; k<table.rows[j].cells.length; k++){
+					if (table.rows[j].cells[k].childNodes[0].selectedIndex>0){
+						var x = table.rows[j].cells[k].childNodes[0];
+						var timeofcell = table.rows[j].cells[1].innerHTML;
+						var dayofcell = k-2;
+						var temptable = document.getElementById(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" "))+"timetable");
+						var coursecode = x.options[x.selectedIndex].text.substring(x.options[x.selectedIndex].text.indexOf(" ")+1, x.options[x.selectedIndex].text.length);
+						// alert(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" ")));
+						var endpoint = 1;
+						while (temptable.rows[endpoint].cells[dayofcell].innerHTML!='+'){
+							endpoint++;
+						}
+						// alert(endpoint);
+						temptable.rows[endpoint].cells[dayofcell].innerHTML = timeofcell+' '+coursecode;
+						temptable.rows[endpoint+1].cells[dayofcell].innerHTML = "+";
+						for (var jj=0; jj<=dayofcell; jj++)
+							temptable.rows[endpoint+1].cells[jj].style.display = "";
+						temptable.rows[endpoint+1].cells[dayofcell].style.border = '4px solid #FFFFFF';
+						sorttable(temptable.rows[endpoint].cells[dayofcell],temptable);
+					}
+				}
+			}
+			
+			alert('Done!');
+		} else {
+			if (middleout==0)
+				alert("There is no solution, please swap the previous timetable.");
+		}
+	}
+}
+
 function generate(){
+	advancegen = 0;
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
 	for (var j=1; j<table.rows.length; j++){
@@ -1075,7 +1256,7 @@ function showdata(){
 function preset(x,y){
 	if (x.innerHTML=="x"){
 		if (x.parentNode.childNodes[0].selectedIndex==0){
-			x.innerHTML='cancel✓';
+			x.innerHTML='cancel';//✓';
 			x.parentNode.style.backgroundColor = "white";
 			x.parentNode.childNodes[0].style.visibility = "hidden";
 		} else {
