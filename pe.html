@@ -54,10 +54,15 @@ th{
 	padding: 10px;
 	border: 4px solid white;
 }
+mark {
+    background-color: black;
+    color: white;
+}
 </style>
 </head>
 
 <body>
+<div id="showoutcome"></div>
 <div id="all">
 <div id="datainput">
 Teacher:
@@ -141,6 +146,7 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <button onclick="generate()" style="padding: 20px; border-radius: 50px;">Generate Time Table</button>
 <button onclick="cleartable()" style="padding: 20px; border-radius: 50px;">Clear All</button>
 <button onclick="setorder()" style="padding: 20px; border-radius: 50px;">Set Order</button>
+<button onclick="printall()" style="padding: 20px; border-radius: 50px;">Save and Print</button>
 <br><div id="showprogress"></div>	
 <div id="showdataarea"></div>
 </div>
@@ -1251,6 +1257,7 @@ function changetableheader(x){
 	document.getElementById("tableheader").innerHTML=x.options[x.selectedIndex].text;
 	changetable(document.getElementById("tableheader").innerHTML);
 	//-------------------------------
+	var table = document.getElementById(document.getElementById("tableheader").innerHTML+'table');
 	if (overrideorder==0){
 		if (table.id=="HCFtable"){
 			tablexlength = 24;
@@ -1642,6 +1649,145 @@ function showpage(x){
 		document.getElementById('venuelistarea').hidden=true;
 		document.getElementById('sportslistarea').hidden=true;
 		document.getElementById('teachingplanlistarea').hidden=false;
+	}
+}
+
+function showprint(){
+	document.getElementById("showoutcome").hidden = true;
+	document.getElementById("all").hidden = false;
+}
+
+function printall(){
+	var ucgadded = 0;
+	var tempoutput = '';
+	if (confirm("Are you sure you have done everthing here?")){
+		for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
+			var table = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			if (table.id.substring(0,2)=="LN"){
+				if (table.id=="LNtable"){
+					tempoutput+="LN";
+					tempoutput+='<br><table id="LNtableoutput">'+table.innerHTML+'</table><br><br>';
+				}
+			} else if (table.id.substring(0,3)=="HCF"){
+				if (table.id=="HCFtable"){
+					tempoutput+="HCF";
+					tempoutput+='<br><table id="HCFtableoutput">'+table.innerHTML+'</table><br><br>';
+				}
+			} else if (table.id.substring(0,3)=="UCG"){
+				if (ucgadded==0){
+					ucgadded = 1;
+					tempoutput+="UCG";
+					tempoutput+='<br><table id="UCGtableoutput">'+table.innerHTML+'</table><br><br>';
+				}
+			} else {
+				tempoutput+=document.getElementById("venuelist").rows[j].cells[1].innerHTML;
+				tempoutput+='<br><table id="'+table.id+'output">'+table.innerHTML+'</table><br><br>';
+			}
+			
+		}
+		document.getElementById("all").hidden = true;
+		document.getElementById("showoutcome").hidden = false;
+		document.getElementById("showoutcome").innerHTML = tempoutput;
+		for (var j=1; j<=9; j++){
+			var newrow, newcell;
+
+			newrow = document.getElementById("LNtableoutput").insertRow(j*3);
+			newrow.innerHTML = document.getElementById("LNtableoutput").rows[j*3-1].innerHTML;
+
+			newrow = document.getElementById("HCFtableoutput").insertRow(j*4);
+			newrow.innerHTML = document.getElementById("HCFtableoutput").rows[j*4-1].innerHTML;
+		}
+		for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
+			if (document.getElementById("venuelist").rows[j].cells[1].innerHTML.substring(0,2)=="LN"){
+				var table = document.getElementById("LNtableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			} else if (document.getElementById("venuelist").rows[j].cells[1].innerHTML.substring(0,3)=="HCF"){
+				var table = document.getElementById("HCFtableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			} else if (document.getElementById("venuelist").rows[j].cells[1].innerHTML.substring(0,3)=="UCG"){
+				var table = document.getElementById("UCGtableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			} else {
+				var table = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"tableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			}
+			for (var jj=1; jj<table.rows.length; jj++){
+				for (var kk=2; kk<=7; kk++){
+					table.rows[jj].cells[kk].innerHTML = "";
+					table.rows[jj].cells[kk].style.backgroundColor = "black";
+				}
+			}
+		}
+		for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
+			if (document.getElementById("venuelist").rows[j].cells[1].innerHTML.substring(0,2)=="LN"){
+				var table = document.getElementById("LNtableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			} else if (document.getElementById("venuelist").rows[j].cells[1].innerHTML.substring(0,3)=="HCF"){
+				var table = document.getElementById("HCFtableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			} else if (document.getElementById("venuelist").rows[j].cells[1].innerHTML.substring(0,3)=="UCG"){
+				var table = document.getElementById("UCGtableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			} else {
+				var table = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"tableoutput");
+				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
+			}
+			for (var jj=1; jj<table2.rows.length; jj++){
+				for (var kk=2; kk<=6; kk++){
+					if (table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text!=''){
+						if (table2.id=="LNtable"){
+							// alert(table.id);
+							var tempfit = Math.floor((jj-1)/2)*3+1;
+							// alert(tempfit);
+							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)/2*3+2)){
+								tempfit++;
+							}
+							// alert(tempfit);
+							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+							// alert(tempfit+' '+kk+' '+table.rows[tempfit].cells[kk].innerHTML);
+						} else if (table2.id=="HCFtable"){
+							var tempfit = Math.floor((jj-1)/3)*4+1;
+							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)/3*4+3)){
+								tempfit++;
+							}
+							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+						} else if (table2.id.substring(0,2)=="LN"){
+							var tempfit = (jj-1)*3+1;
+							// alert(tempfit);
+							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)*3+2)){
+								tempfit++;
+							}
+							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+						} else if (table2.id.substring(0,3)=="HCF"){
+							var tempfit = (jj-1)*4+1;
+							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)*4+3)){
+								tempfit++;
+							}
+							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+						} else {
+							if (table.rows[jj].cells[kk].innerHTML.substring(0,7)=='<select'||table.rows[jj].cells[kk].innerHTML==''){
+								table.rows[jj].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+							}
+						}
+
+
+
+
+
+					}
+					
+					
+					
+					// // if (table2.rows[jj].cells[kk].childNodes[1].innerHTML!='x'){
+					// 	table.rows[jj].cells[kk].style.backgroundColor = "black";
+					// }
+					// alert(table.rows[1].cells[2].childNodes[0].innerHTML);
+					// table.rows[jj].cells[kk].style.color = "black";
+				}
+			}
+		}
+		document.getElementById("showoutcome").innerHTML+='<button onclick="showprint()">Back</button>';
+		alert('ok');
 	}
 }
 </script>
