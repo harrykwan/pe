@@ -15,6 +15,11 @@ body{
 	color: white;
 	font-family: arial;
 }
+.showoutcome{
+	/*background-color: white;
+	color: black;
+	font-family: arial;*/
+}
 input[type=text] {
     background-color: black;
     color: white;
@@ -57,12 +62,15 @@ th{
 mark {
     background-color: black;
     color: white;
+  /*  light purple is #EE82EE;*/
+    /*background-color: white;
+    color: black;*/
 }
 </style>
 </head>
 
 <body>
-<div id="showoutcome"></div>
+<div class="showoutcome" hidden="true" id="showoutcome"></div>
 <div id="all">
 <div id="datainput">
 Teacher:
@@ -295,11 +303,30 @@ function dfs(t,c,x,y,n){
 								teacherdayct++;
 							}
 						}
+
 						for (var jjj=0; jjj<=4; jjj++){
 							if (document.getElementById(cellteacher+"timetable").rows[1].cells[jjj].innerHTML.substring(0,5)=='08:30'){
 								eighthalf++;
 							}
 						}
+
+						var lunchtimect = 0;
+						for (var jjj=1; jjj<=4; jjj++){
+							if (comparetime(document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML,"11:16-12:59")==2&&document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!='+'&&document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!=''){
+								console.log(document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML);
+								lunchtimect++;
+							}
+						}
+						
+						if (comparetime(t.rows[orderlistx[j]].cells[1].innerHTML,"11:16-14:15")==2){
+							lunchtimect++;
+						}
+						for (var jjj=1; jjj<t.rows.length; jjj++){
+							if (comparetime(t.rows[jjj].cells[1].innerHTML,"11:16-12:59")==2&&t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text.substring(0,t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text.indexOf(' '))==cellteacher){
+								lunchtimect++;
+							}
+						}
+						// console.log(lunchtimect);
 						// alert(eighthalf);
 						// alert(teacherdayct);
 						if (t.id=='HCFtable'){
@@ -504,7 +531,7 @@ function dfs(t,c,x,y,n){
 						// debug+="maxtogether: "+maxtogether;
 						// if (orderlisty[k]>2)
 						// 	alert(eighthalf+' '+orderlistx[j]+' '+tooearly);
-						if (maxtogether<=3&&teacherdayct<4&&tooearly==0){
+						if (maxtogether<=3&&teacherdayct<4&&tooearly==0&&lunchtimect<=3){
 							var checkcell,checkcell2,check1,check2;
 							if (t.id=="SPtable"){		//&&orderlistx[j]==2){
 								checkcell = t.rows[1].cells[orderlisty[k]].childNodes[0];
@@ -793,7 +820,9 @@ function advancegenerate(){
 			}
 		}
 			
-
+		if (generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2){
+			alert('No Fast solution');
+		}
 
 		if (generatedone==(table.rows[1].cells[2].childNodes[0].length-1)*2||middleout==1){
 			//check
@@ -1214,6 +1243,7 @@ function confirmtimetable(x){
 		document.getElementById("showfinaldata").hidden = true;
 		changetable(document.getElementById("tableheader").innerHTML);
 	} else {
+		printteacher();
 		document.getElementById("startchoosing").hidden = true;
 		document.getElementById("showfinaldata").hidden = false;
 	}
@@ -1838,7 +1868,67 @@ function showprint(){
 	document.getElementById("all").hidden = false;
 }
 
+function printteacher(){
+	var tempoutput = '';
+	var table = '';
+	for (var j=0; j<document.getElementById("teacherlist").rows.length; j++){
+		// console.log(j);
+		var tempteachername = document.getElementById("teacherlist").rows[j].cells[1].innerHTML;
+		table += tempteachername+"<br><table id='"+tempteachername+"finaltable'><tr><th></th><th>Time Slot</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thur</th><th>Fri</th><th>Sat</th></tr>";
+		for (var jj=1; jj<=9; jj++){
+			table += '<tr><th>'+jj+'</th><th onclick="changetime(this)">'+timecount(jj+7)+':30-'+timecount(jj+8)+':15</th>';
+			for (kk=1; kk<=6; kk++){
+				table += '<th></th>';
+			}
+			table += '</tr>';
+		}
+		table += '</table><br><br>';
+	}
+	tempoutput="<html><body><style>table, th{border: 1px solid black;}</style>"+table+"</body></html>";
+	var newwindow2 = window.open();
+	newwindow2.document.write(tempoutput);
+	for (var j=0; j<document.getElementById("teacherlist").rows.length; j++){
+		var teachertable = document.getElementById(document.getElementById("teacherlist").rows[j].cells[1].innerHTML+'timetable');
+		for (var jj=0; jj<=4; jj++){
+			for (var k=1; k<=4; k++){
+				if (teachertable.rows[k].cells[jj].innerHTML!='+'&&teachertable.rows[k].cells[jj].innerHTML!=''){
+					var teacherfinaltable = newwindow2.document.getElementById(document.getElementById("teacherlist").rows[j].cells[1].innerHTML+'finaltable');
+					// console.log(document.getElementById("teacherlist").rows[j].cells[1].innerHTML);
+					for (var kk=1; kk<=9; kk++){
+						if (comparetime(teacherfinaltable.rows[kk].cells[1].innerHTML,teachertable.rows[k].cells[jj].innerHTML)==2){
+							teacherfinaltable.rows[kk].cells[jj+2].innerHTML = teachertable.rows[k].cells[jj].innerHTML.substring(12,teachertable.rows[k].cells[jj].innerHTML.length);
+						}
+					}
+				}
+			}
+		}
+		
+	}
+	if (isprint){
+		for (var j=0; j<document.getElementById("teacherlist").rows.length; j++){
+			if (newwindow2.confirm('download '+document.getElementById("teacherlist").rows[j].cells[1].innerHTML+'?')){
+				var table = newwindow2.document.getElementById(document.getElementById("teacherlist").rows[j].cells[1].innerHTML+"finaltable");
+				// newwindow.alert(table.id);
+				var elHtml = "<html><body><style>table, th{border: 1px solid black;}</style><table>"+document.getElementById("teacherlist").rows[j].cells[1].innerHTML+'<br>'+table.innerHTML+"</table></body></html>";
+			    var link = document.createElement('a');
+			    var mimeType = 'text/plain';
+			    var filename = document.getElementById("teacherlist").rows[j].cells[1].innerHTML+'.html';
+			    link.setAttribute('download', filename);
+			    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
+			    link.click();
+			}
+		}
+		isprint = 0;
+	}
+	
+	alert('teacher table done!');
+}
+
+
+var isprint = 0;
+var finalvenuelist = [];
 function printall(){
+	isprint = 1;
 	var ucgadded = 0;
 	var tempoutput = '';
 	if (confirm("Are you sure you have done everthing here?")){
@@ -1846,28 +1936,32 @@ function printall(){
 			var table = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
 			if (table.id.substring(0,2)=="LN"){
 				if (table.id=="LNtable"){
+					finalvenuelist[finalvenuelist.length] = "LNtable";
 					tempoutput+="LN";
 					tempoutput+='<br><table id="LNtableoutput">'+table.innerHTML+'</table><br><br>';
 				}
 			} else if (table.id.substring(0,3)=="HCF"){
 				if (table.id=="HCFtable"){
+					finalvenuelist[finalvenuelist.length] = "HCFtable";
 					tempoutput+="HCF";
 					tempoutput+='<br><table id="HCFtableoutput">'+table.innerHTML+'</table><br><br>';
 				}
 			} else if (table.id.substring(0,3)=="UCG"){
 				if (ucgadded==0){
+					finalvenuelist[finalvenuelist.length] = "UCGtable";
 					ucgadded = 1;
 					tempoutput+="UCG";
 					tempoutput+='<br><table id="UCGtableoutput">'+table.innerHTML+'</table><br><br>';
 				}
 			} else {
+				finalvenuelist[finalvenuelist.length] = table.id;
 				tempoutput+=document.getElementById("venuelist").rows[j].cells[1].innerHTML;
 				tempoutput+='<br><table id="'+table.id+'output">'+table.innerHTML+'</table><br><br>';
 			}
 			
 		}
-		document.getElementById("all").hidden = true;
-		document.getElementById("showoutcome").hidden = false;
+		// document.getElementById("all").hidden = true;
+		// document.getElementById("showoutcome").hidden = false;
 		document.getElementById("showoutcome").innerHTML = tempoutput;
 		for (var j=1; j<=9; j++){
 			var newrow, newcell;
@@ -1892,10 +1986,13 @@ function printall(){
 				var table = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"tableoutput");
 				var table2 = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
 			}
+			if (table.rows[0].cells[8]!=null){
+				table.rows[0].deleteCell(8);
+			}
 			for (var jj=1; jj<table.rows.length; jj++){
 				for (var kk=2; kk<=7; kk++){
 					table.rows[jj].cells[kk].innerHTML = "";
-					table.rows[jj].cells[kk].style.backgroundColor = "black";
+					table.rows[jj].cells[kk].style.backgroundColor = "white";
 				}
 			}
 		}
@@ -1924,30 +2021,30 @@ function printall(){
 								tempfit++;
 							}
 							// alert(tempfit);
-							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+							table.rows[tempfit].cells[kk].innerHTML = /*'<mark>'+*/table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text;//+'</mark>';
 							// alert(tempfit+' '+kk+' '+table.rows[tempfit].cells[kk].innerHTML);
 						} else if (table2.id=="HCFtable"){
 							var tempfit = Math.floor((jj-1)/3)*4+1;
 							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)/3*4+3)){
 								tempfit++;
 							}
-							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+							table.rows[tempfit].cells[kk].innerHTML = /*'<mark>'+*/table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text;//+'</mark>';
 						} else if (table2.id.substring(0,2)=="LN"){
 							var tempfit = (jj-1)*3+1;
 							// alert(tempfit);
 							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)*3+2)){
 								tempfit++;
 							}
-							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+							table.rows[tempfit].cells[kk].innerHTML = /*'<mark>'+*/table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text;//+'</mark>';
 						} else if (table2.id.substring(0,3)=="HCF"){
 							var tempfit = (jj-1)*4+1;
 							while ((!table.rows[tempfit].cells[kk].innerHTML=='')&&(tempfit<(jj-1)*4+3)){
 								tempfit++;
 							}
-							table.rows[tempfit].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+							table.rows[tempfit].cells[kk].innerHTML = /*'<mark>'+*/table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text;//+'</mark>';
 						} else {
 							if (table.rows[jj].cells[kk].innerHTML.substring(0,7)=='<select'||table.rows[jj].cells[kk].innerHTML==''){
-								table.rows[jj].cells[kk].innerHTML = '<mark>'+table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text+'</mark>';
+								table.rows[jj].cells[kk].innerHTML = /*'<mark>'+*/table2.rows[jj].cells[kk].childNodes[0].options[table2.rows[jj].cells[kk].childNodes[0].selectedIndex].text;//+'</mark>';
 							}
 						}
 
@@ -1967,8 +2064,50 @@ function printall(){
 				}
 			}
 		}
-		document.getElementById("showoutcome").innerHTML+='<button onclick="showprint()">Back</button>';
-		alert('ok');
+		var newwindow = window.open();
+		// document.getElementById("showoutcome").style = "border: 4px solid black; padding: 40px; width: 60%;";
+		newwindow.document.write('<style>table, th{border: 1px solid black;}</style>'+document.getElementById("showoutcome").innerHTML);
+
+		// newwindow.document.getElementById("LNtableoutput").rows[0].cells[0].innerHTML;
+		// document.getElementById("showoutcome").innerHTML+='<button onclick="showprint()">Back</button>';
+
+		for (var j=1; j<=9; j++){
+			var table = newwindow.document.getElementById("LNtableoutput");
+			table.rows[(j-1)*3+1].cells[1].rowSpan="3";
+			table.rows[(j-1)*3+2].deleteCell(1);
+			table.rows[(j-1)*3+3].deleteCell(1);
+			table.rows[(j-1)*3+1].cells[0].rowSpan="3";
+			table.rows[(j-1)*3+2].deleteCell(0);
+			table.rows[(j-1)*3+3].deleteCell(0);
+		}
+		for (var j=1; j<=9; j++){
+			var table = newwindow.document.getElementById("HCFtableoutput");
+			table.rows[(j-1)*4+1].cells[1].rowSpan="4";
+			table.rows[(j-1)*4+2].deleteCell(1);
+			table.rows[(j-1)*4+3].deleteCell(1);
+			table.rows[(j-1)*4+4].deleteCell(1);
+			table.rows[(j-1)*4+1].cells[0].rowSpan="4";
+			table.rows[(j-1)*4+2].deleteCell(0);
+			table.rows[(j-1)*4+3].deleteCell(0);
+			table.rows[(j-1)*4+4].deleteCell(0);
+		}
+		// newwindow.alert(finalvenuelist.length);
+		for (var j=0; j<finalvenuelist.length; j++){
+			if (newwindow.confirm('download '+finalvenuelist[j]+'?')){
+				var table = newwindow.document.getElementById(finalvenuelist[j]+"output");
+				// newwindow.alert(table.id);
+				var elHtml = "<html><body><style>table, th{border: 1px solid black;}</style><table>"+finalvenuelist[j]+'<br>'+table.innerHTML+"</table></body></html>";
+			    var link = document.createElement('a');
+			    var mimeType = 'text/plain';
+			    var filename = finalvenuelist[j]+'.html';
+			    link.setAttribute('download', filename);
+			    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
+			    link.click();
+			}
+		}
+		printteacher();
+		
+		alert('venue table done');
 	}
 }
 </script>
