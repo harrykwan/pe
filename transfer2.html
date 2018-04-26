@@ -1,0 +1,231 @@
+<html>
+<body>
+	Paste Here:<br>
+	<textarea style="width: 500px; height: 300px" id="inputhere"></textarea><br><br>
+	
+<!-- <div id="codeoutput"></div>
+	Course Title:<br>
+	<textarea id="titleinputhere"></textarea><br><br>
+	<div id="titleoutput"></div>
+
+	Teaching Staff:<br>
+	<textarea id="teacherinputhere"></textarea><br><br>
+	<div id="teacheroutput"></div>
+
+	Location:<br>
+	<textarea id="locationinputhere"></textarea><br><br>
+	<div id="locationoutput"></div>
+
+	Language:<br>
+	<textarea id="languageinputhere"></textarea><br><br>
+	<div id="languageoutput"></div>
+ -->
+	<button onclick="translatedata()">Translate</button>
+
+<div id="exportdata" hidden="true">
+
+						Teacher:
+						<input onkeyup="checkkey(event,'teacher')" type="text" id="teacherinput"> 
+						<button id="teacheradd" onclick="add('teacher')">add</button>
+						<br><br>
+
+						Venue:
+						<input onkeyup="checkkey(event,'venue')" type="text" id="venueinput"> 
+						<button id="venueadd" onclick="add('venue')">add</button>
+						<br><br>
+
+						Sports:
+						<input onkeyup="checkkey(event,'sports')" type="text" id="sportsinput"> 
+						<button id="sportsadd" onclick="add('sports')">add</button>
+						<br><br>
+
+						Teaching plan:
+						<select onclick="showpage('teachingplan')" id="teacherchoose"></select>
+						<select onclick="showpage('teachingplan')" id="venuechoose"></select>
+						<select onclick="showpage('teachingplan')" id="sportschoose"></select>
+						<select onclick="showpage('teachingplan')" id="genderchoose"><option>Male</option><option>Female</option><option>Mix</option></select>
+						<select onclick="showpage('teachingplan')" id="languagechoose"><option>C</option><option>E</option><option>P</option></select>
+						<input type="number" onclick="showpage('teachingplan')" id="quantitychoose" value="1"> 
+						<button id="teachingplanadd" onclick="add('teachingplan')">add</button>
+						<br><br>
+						<br><br>
+
+						<button onclick="showpage(&quot;teacher&quot;)">Teacher List</button>
+						<button onclick="showpage(&quot;venue&quot;)">Venue List</button>
+						<button onclick="showpage(&quot;sports&quot;)">Sports list</button>
+						<button onclick="showpage(&quot;teachingplan&quot;)">Teaching Plan List</button>
+						<br><br>
+
+						<div hidden="true" id="teacherlistarea">
+						<h3>List of teachers:</h3>
+						<table style="width:70%" id="teacherlist"></table>
+						<br>
+						</div>
+
+
+						<div hidden="true" id="venuelistarea">
+						<h3>List of venues:</h3>
+						<table style="width:70%" id="venuelist"></table>
+						<br>
+						</div>
+
+
+						<div hidden="true" id="sportslistarea">
+						<h3>List of sports:</h3>
+						<table style="width:70%" id="sportslist"></table>
+						<br>
+						</div>
+
+						<div hidden="true" id="teachingplanlistarea">
+						<h3>List of teaching plans:</h3>
+						<table style="width:90%" id="teachingplanlist"></table>
+						<br>
+						</div>
+						<br><br>
+						<button onclick="savepage()" style="padding: 20px; border-radius: 50px;">Save Data</button>
+						<button onclick="showsaveddata()" style="padding: 20px; border-radius: 50px;">Show Saved Data</button>
+						<!-- <button onclick="showsaveddata2()" style="padding: 20px; border-radius: 50px;">Show Progress</button> -->
+						<button onclick="cleardata()" style="padding: 20px; border-radius: 50px;">Clear all Data</button>
+						<button onclick="nextpage()" style="padding: 20px; border-radius: 50px;">Done</button>
+						<br><br>
+						<button onclick="downloaddata()" style="padding: 20px; border-radius: 50px;">Export Data</button>
+						<button onclick="readTextFile()" style="padding: 20px; border-radius: 50px;">Import Data</button>
+						</div>
+	
+<script>
+	document.getElementById("inputhere").value = "teacher\tvenue\tsports\tgender\tcoursecode";
+	function repeatdata(x){
+		var finaldata = [], datact = 0;
+		for (var j=x.length-1; j>=0; j--){
+			var repeated = -1;
+			for (var k=0; k<datact; k++){
+				if (x[j]==finaldata[k])
+					repeated = j;
+			}
+			if (repeated==-1){
+				finaldata[datact] = x[j];
+				datact++;
+			}
+		}
+		return finaldata;
+	}
+
+	function translatedata(){
+		var finaldata = "";
+			var x = document.getElementById("inputhere").value.split("\n");
+			for (var j=0; j<x.length; j++){
+				var tempx = x[j].split("\t");
+				// console.log(tempx[0]+'+'+tempx[1]);
+				teacherarray[j] = tempx[0];
+				locationarray[j] = tempx[0];
+				sportsarray[j] = tempx[0];
+				genderarray[j] = tempx[0];
+				teacherarray[j] = tempx[0];
+			}
+			var codearray = [];
+
+			var genderarray = [];
+
+			var sportsarray = [];
+			
+			var teacherarray = [];
+
+			var locationarray = [];
+
+			var languagearray = [];
+
+		
+			var newteacherarray = repeatdata(teacherarray);
+
+			var newlocationarray = repeatdata(locationarray);
+
+			var newsportsarray = repeatdata(sportsarray);
+
+			for (var j=0; j<newteacherarray.length; j++){
+				var option = document.createElement("option");
+				option.text = newteacherarray[j];
+				document.getElementById("teacherchoose").add(option);
+			}
+
+			for (var j=0; j<newlocationarray.length; j++){
+				var option = document.createElement("option");
+				option.text = newlocationarray[j];
+				document.getElementById("venuechoose").add(option);
+			}
+
+			for (var j=0; j<newsportsarray.length; j++){
+				var option = document.createElement("option");
+				option.text = newsportsarray[j];
+				document.getElementById("sportschoose").add(option);
+			}
+
+			for (var j=0; j<newteacherarray.length; j++){
+				var table = document.getElementById("teacherlist");
+				var row = table.insertRow(table.rows.length);
+				var cell0 = row.insertCell(0);
+				var cell1 = row.insertCell(1);
+				var cell2 = row.insertCell(2);
+				cell0.innerHTML = j+1;
+				cell1.innerHTML = newteacherarray[j];
+				cell2.innerHTML = "<button onclick='deletetable(this,&quot;teacher&quot;)'>x</button>";
+			}
+
+			for (var j=0; j<newlocationarray.length; j++){
+				var table = document.getElementById("venuelist");
+				var row = table.insertRow(table.rows.length);
+				var cell0 = row.insertCell(0);
+				var cell1 = row.insertCell(1);
+				var cell2 = row.insertCell(2);
+				cell0.innerHTML = j+1;
+				cell1.innerHTML = newlocationarray[j];
+				cell2.innerHTML = "<button onclick='deletetable(this,&quot;venue&quot;)'>x</button>";
+			}
+
+			for (var j=0; j<newsportsarray.length; j++){
+				var table = document.getElementById("sportslist");
+				var row = table.insertRow(table.rows.length);
+				var cell0 = row.insertCell(0);
+				var cell1 = row.insertCell(1);
+				var cell2 = row.insertCell(2);
+				cell0.innerHTML = j+1;
+				cell1.innerHTML = newsportsarray[j];
+				cell2.innerHTML = "<button onclick='deletetable(this,&quot;sports&quot;)'>x</button>";
+			}
+			
+			for (var j=0; j<teacherarray.length; j++){
+					var table = document.getElementById("teachingplanlist");
+					var row = table.insertRow(table.rows.length);
+					var cell0 = row.insertCell(0);
+					var cell1 = row.insertCell(1);
+					var cell2 = row.insertCell(2);
+					var cell3 = row.insertCell(3);
+					var cell4 = row.insertCell(4);
+					var cell5 = row.insertCell(5);
+					var cell6 = row.insertCell(6);
+					var cell7 = row.insertCell(7);
+					cell0.innerHTML = j+1;
+					cell1.innerHTML = teacherarray[j];
+					cell2.innerHTML = locationarray[j];
+					cell3.innerHTML = sportsarray[j];
+					cell6.innerHTML = languagearray[j]
+					cell7.innerHTML = "<button onclick='deletetable(this,&quot;teachingplan&quot;)'>x</button>";
+					cell4.innerHTML = genderarray[j];
+					cell5.innerHTML = codearray[j];
+			}
+
+			var elHtml = document.getElementById("exportdata").innerHTML;
+		    var link = document.createElement('a');
+		    var mimeType = 'text/plain';
+		    var filename = 'data.txt';
+		    link.setAttribute('download', filename);
+		    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
+		    link.click(); 
+
+	}
+
+
+
+
+</script>
+</body>
+</html>
