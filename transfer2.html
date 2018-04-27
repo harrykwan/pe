@@ -93,7 +93,7 @@
 						</div>
 	
 <script>
-	document.getElementById("inputhere").value = "teacher\tvenue\tsports\tgender\tcoursecode";
+	document.getElementById("inputhere").value = "teacher\tvenue\tsports\tgender\tcoursecode\tlanguage";
 	function repeatdata(x){
 		var finaldata = [], datact = 0;
 		for (var j=x.length-1; j>=0; j--){
@@ -112,16 +112,7 @@
 
 	function translatedata(){
 		var finaldata = "";
-			var x = document.getElementById("inputhere").value.split("\n");
-			for (var j=0; j<x.length; j++){
-				var tempx = x[j].split("\t");
-				// console.log(tempx[0]+'+'+tempx[1]);
-				teacherarray[j] = tempx[0];
-				locationarray[j] = tempx[0];
-				sportsarray[j] = tempx[0];
-				genderarray[j] = tempx[0];
-				teacherarray[j] = tempx[0];
-			}
+			
 			var codearray = [];
 
 			var genderarray = [];
@@ -134,7 +125,18 @@
 
 			var languagearray = [];
 
-		
+			var x = document.getElementById("inputhere").value.split("\n");
+			for (var j=0; j<x.length; j++){
+				var tempx = x[j].split("\t");
+				// console.log(tempx[0].substring(0,tempx[0].length)+'+'+tempx[1]+'+'+tempx[2]+'+'+tempx[3]+'+'+tempx[4]+'+'+tempx[5]);
+				teacherarray[j] = tempx[0];
+				locationarray[j] = tempx[1];
+				sportsarray[j] = tempx[2];
+				genderarray[j] = tempx[3];
+				codearray[j] = tempx[4];
+				languagearray[j] = tempx[5];
+			}
+
 			var newteacherarray = repeatdata(teacherarray);
 
 			var newlocationarray = repeatdata(locationarray);
@@ -213,6 +215,7 @@
 					cell5.innerHTML = codearray[j];
 			}
 
+			// prompt("Copy it",document.getElementById("exportdata").innerHTML);
 			var elHtml = document.getElementById("exportdata").innerHTML;
 		    var link = document.createElement('a');
 		    var mimeType = 'text/plain';
