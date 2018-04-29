@@ -70,9 +70,12 @@ mark {
 </head>
 
 <body>
+<div id="bodyall">
 <div class="showoutcome" hidden="true" id="showoutcome"></div>
 <div id="all">
+<div hidden="true" id="loadvenuedata"></div>
 <div id="datainput">
+<div hidden="true" id='additionaldata'></div>
 Teacher:
 <input onkeyup="checkkey(event,'teacher')" type="text" id="teacherinput"> </input>
 <button id='teacheradd' onclick="add('teacher')" >add</button>
@@ -138,12 +141,14 @@ Teaching plan:
 <button onclick="nextpage()" style="padding: 20px; border-radius: 50px;">Done</button>
 <br><br>
 <button onclick="downloaddata()" style="padding: 20px; border-radius: 50px;">Export Data</button>
-<button onclick="readTextFile()" style="padding: 20px; border-radius: 50px;">Import Data</button>
+<button onclick="readTextFile()" style="padding: 20px; border-radius: 50px;">Import Data</button> 
+<button onclick="loadallpage()" style="padding: 20px; border-radius: 50px;">Load</button>
 </div>
 
 <div id="startchoosing" hidden=true>
 Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage"></select>
 <br><br>
+<div id="quotaleft">0 more to fill. </div>
 <h1 id="tableheader"></h1>
 <div id="timetablearea"></div>
 <br><br>
@@ -155,7 +160,11 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 <button onclick="advancegenerate()" style="padding: 20px; border-radius: 50px;">Advance Generate</button>
 <button onclick="cleartable()" style="padding: 20px; border-radius: 50px;">Clear All</button>
 <button onclick="setorder()" style="padding: 20px; border-radius: 50px;">Set Order</button>
-<button onclick="printall()" style="padding: 20px; border-radius: 50px;">Save and Print</button>
+<button onclick="printall()" style="padding: 20px; border-radius: 50px;">Print Venue</button>
+<button onclick="printteacher()" style="padding: 20px; border-radius: 50px;">Print Teacher</button>
+<br>
+<button onclick="saveallpage()" style="padding: 20px; border-radius: 50px;">Save</button>
+<button onclick="loadallpage()" style="padding: 20px; border-radius: 50px;">Load</button>
 <br><div id="showprogress"></div>	
 <div id="showdataarea"></div>
 </div>
@@ -168,6 +177,7 @@ Choose the venue: <select onchange="changetableheader(this)" id="choosevenuepage
 </div>
 <div id="debug"></div>
 <input type="file" hidden="true" id="fileinput" onchange="importdata(this)">
+</div>
 </div>
 <script>
 var debug = '';
@@ -233,6 +243,7 @@ var keepfail = 0;
 var middleout =0;
 var firstindfs = 0;
 function dfs(t,c,x,y,n){
+	// console.log(x+' '+y+' '+n);
 	// alert(x+' '+y+' '+n);
 	if (middleout) return;
 	var eighthalfpass = 1;
@@ -249,7 +260,7 @@ function dfs(t,c,x,y,n){
 		firstindfs = 0;
 	}
 	// alert(eighthalfpass);
-	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1){
+	if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1&&t.rows[x].cells[y].childNodes[0].selectedIndex==0){
 		t.rows[x].cells[y].childNodes[0].options[n].selected = true;
 		t.rows[x].cells[y].style.backgroundColor = colorlist[n];
 		// alert('i get in la');
@@ -260,6 +271,7 @@ function dfs(t,c,x,y,n){
 	// 	alert(x+' '+y+' '+n);
 	// }
 	// document.getElementById("showprogress").innerHTML = (generatedone/((t.rows[1].cells[2].childNodes[0].length-1)*2)*100)+'%';
+	// console.log(generatedone+' '+(t.rows[1].cells[2].childNodes[0].length-1)*2);
 	if (generatedone<(t.rows[1].cells[2].childNodes[0].length-1)*2){
 		if (checkprogress==1||keepfail>=1000){
 			keepfail = 0;
@@ -293,6 +305,11 @@ function dfs(t,c,x,y,n){
 						var teacherdayct = 0;
 						var eighthalf = 0;
 						var tooearly = 0;
+						var afterswim = 0;
+						// var occupytable = [];
+						// for (var jjj=0; jjj<=15; jjj++){
+						// 	occupytable[jjj] = 0;
+						// }
 						for (var jjj=1; document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!=''; jjj++){
 							var tempteachercell = document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML;
 							// alert(tempteachercell);
@@ -302,19 +319,42 @@ function dfs(t,c,x,y,n){
 							// }
 							if (tempteachercell.substring(tempteachercell.length-2,tempteachercell.length)!='NA'&&tempteachercell!='+'){
 								teacherdayct++;
+								// console.log(t.rows[orderlistx[j]].cells[1].innerHTML.substring(0,2));
+								// if (comparetime(t.rows[orderlistx[j]].cells[1].innerHTML,tempteachercell)==2){
+									// occupytable[t.rows[orderlistx[j]].cells[1].innerHTML.substring(0,2)-7]=1;
+								// }
+								if (orderlistx[j]>1&&comparetime(t.rows[orderlistx[j]-1].cells[1].innerHTML,tempteachercell)==2&&(tempteachercell.substring(12,16)==1015||tempteachercell.substring(12,16)==1016||tempteachercell.substring(12,16)==1020)){
+									afterswim = 1;
+								}
 							}
+							
 						}
-
+						// console.log(occupytable);
+						// var triplelesson = 0;
+						// for (var jjj=1; jjj<t.rows.length; jjj++){
+						// 	var tempcellteacher2 = t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text;
+						// 	tempcellteacher2 = tempcellteacher2.substring(0,tempcellteacher2.indexOf(' '));
+							// if (tempcellteacher2==cellteacher){
+							// 	occupytable[t.rows[jjj].cells[1].innerHTML.substring(0,2)-7]=1;
+							// }
+						// }
+						// for (var jjj=1; jjj<=9-2; jjj++){
+						// 	if ((occupytable[jjj]==1||t.rows[orderlistx[j]].cells[1].innerHTML.substring(0,2)-7==jjj)&&(occupytable[jjj+1]==1||t.rows[orderlistx[j]].cells[1].innerHTML.substring(0,2)-7==jjj+1)&&(occupytable[jjj+2]==1||t.rows[orderlistx[j]].cells[1].innerHTML.substring(0,2)-7==jjj+2)){
+						// 		triplelesson = 1;
+						// 	}
+						// }
+						// console.log(triplelesson);
 						for (var jjj=0; jjj<=4; jjj++){
-							if (document.getElementById(cellteacher+"timetable").rows[1].cells[jjj].innerHTML.substring(0,5)=='08:30'){
+							// console.log('hi '+document.getElementById(cellteacher+"timetable").rows[1].cells[jjj].innerHTML.substring(12,14));
+							if (document.getElementById(cellteacher+"timetable").rows[1].cells[jjj].innerHTML.substring(0,5)=='08:30'&&document.getElementById(cellteacher+"timetable").rows[1].cells[jjj].innerHTML.substring(12,14)!='NA'){
 								eighthalf++;
 							}
 						}
 
 						var lunchtimect = 0;
-						for (var jjj=1; jjj<=4; jjj++){
-							if (comparetime(document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML,"11:16-12:59")==2&&document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!='+'&&document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!=''){
-								console.log(document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML);
+						for (var jjj=1; document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!='+'; jjj++){
+							if (comparetime(document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML,"11:30-14:15")==2&&document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!='+'&&document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML!=''){
+								// console.log(document.getElementById(cellteacher+"timetable").rows[jjj].cells[orderlisty[k]-2].innerHTML);
 								lunchtimect++;
 							}
 						}
@@ -323,7 +363,7 @@ function dfs(t,c,x,y,n){
 							lunchtimect++;
 						}
 						for (var jjj=1; jjj<t.rows.length; jjj++){
-							if (comparetime(t.rows[jjj].cells[1].innerHTML,"11:16-12:59")==2&&t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text.substring(0,t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text.indexOf(' '))==cellteacher){
+							if (comparetime(t.rows[jjj].cells[1].innerHTML,"11:30-14:15")==2&&t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text.substring(0,t.rows[jjj].cells[orderlisty[k]].childNodes[0].options[t.rows[jjj].cells[orderlisty[k]].childNodes[0].selectedIndex].text.indexOf(' '))==cellteacher){
 								lunchtimect++;
 							}
 						}
@@ -532,7 +572,7 @@ function dfs(t,c,x,y,n){
 						// debug+="maxtogether: "+maxtogether;
 						// if (orderlisty[k]>2)
 						// 	alert(eighthalf+' '+orderlistx[j]+' '+tooearly);
-						if (maxtogether<=3&&teacherdayct<4&&tooearly==0&&lunchtimect<=3){
+						if (teacherdayct<4&&tooearly==0&&lunchtimect<=3&&afterswim==0&&maxtogether<=3){//triplelesson==0&&){
 							var checkcell,checkcell2,check1,check2;
 							if (t.id=="SPtable"){		//&&orderlistx[j]==2){
 								checkcell = t.rows[1].cells[orderlisty[k]].childNodes[0];
@@ -667,16 +707,87 @@ function dfs(t,c,x,y,n){
 		if (generatedone==(t.rows[1].cells[2].childNodes[0].length-1)*2||middleout){
 			return;
 		}
-		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1){
+		if (t.rows[x].cells[y].childNodes[1].innerHTML=="x"&&t.rows[x].cells[y].childNodes[0].options[n].disabled==false&&eighthalfpass==1&&t.rows[x].cells[y].childNodes[0].selectedIndex!=0){
 			teachingplanct[c][n]--;
 			generatedone--;
 			t.rows[x].cells[y].style.backgroundColor = "black";
 			t.rows[x].cells[y].childNodes[0].options[0].selected = true;
 			keepfail++;
+			// console.log('hi'+keepfail);
 		}
 	} else {
 		return;
 	}
+}
+
+function saveallpage(){
+	document.getElementById("loadvenuedata").innerHTML = '';
+	// var tempsavedata = [];
+	for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
+		// tempsavedata[j] = [];
+		for (var jj=1; jj<document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").rows.length; jj++){
+			// tempsavedata[j][jj]=[];
+			for (var kk=2; kk<=6; kk++){
+				document.getElementById("loadvenuedata").innerHTML+=document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").rows[jj].cells[kk].childNodes[0].selectedIndex+' ';
+				// tempsavedata[j][jj][kk] = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").rows[jj].cells[kk].childNodes[0].selectedIndex;
+			}
+			document.getElementById("loadvenuedata").innerHTML+='|';
+		}
+		document.getElementById("loadvenuedata").innerHTML+='\n';
+	}
+	
+
+	var elHtml = document.getElementById("bodyall").innerHTML;
+    var link = document.createElement('a');
+    var mimeType = 'text/plain';
+    var filename = 'progress.txt';
+    link.setAttribute('download', filename);
+    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
+    link.click();
+}
+
+function loadallpage(){
+	var temploaddata = prompt("Paste here.",'');
+	if (temploaddata!=null&&temploaddata!=''){
+		document.getElementById("bodyall").innerHTML = temploaddata;
+		var tempvenuedata = document.getElementById("loadvenuedata").innerHTML.split("\n");
+		for (var j=0; j<tempvenuedata.length; j++){
+			tempvenuedata[j] = tempvenuedata[j].split("|");
+			for (var k=0; k<tempvenuedata[j].length; k++){
+				 tempvenuedata[j][k] = tempvenuedata[j][k].split(" ");
+			}
+		}
+
+		for (var j=0; j<100; j++){
+			for (var k=0; k<100; k++){
+				for (var jj=0; jj<100; jj++){
+					presetlesson[j][k][jj] = 0;
+				}
+			}
+		}
+		for (var j=0; j<100; j++){
+			for (var k=0; k<500; k++){
+				teachingplanct[j][k]=0;
+			}
+		}			
+
+		for (var j=0; j<tempvenuedata.length; j++){
+			for (var k=0; k<tempvenuedata[j].length; k++){
+				 for (var jj=0; jj<tempvenuedata[j][k].length; jj++){
+				 	if (tempvenuedata[j][k][jj]!=0){
+				 		document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table").rows[k+1].cells[jj+2].childNodes[0].options[tempvenuedata[j][k][jj]].selected = true;
+				 		presetlesson[j][k+1][jj+2] = 1;
+				 		teachingplanct[j][tempvenuedata[j][k][jj]]++;
+				 	}
+				 }
+			}
+		}
+		// alert(tempvenuedata[0][1][2]);	
+		changetableheader(document.getElementById("choosevenuepage"));
+		// alert(teachingplanct);
+	}
+	// presetlesson[venueindex][x.parentNode.parentNode.rowIndex][x.parentNode.cellIndex]=1;
+	// 	teachingplanct[venueindex][x.selectedIndex]++;
 }
 
 function findgender(x){
@@ -693,7 +804,8 @@ function cleartable(){
 		var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 		for (var j=1; j<table.rows.length; j++){
 			for (var k=2; k<table.rows[j].cells.length; k++){
-				if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+				if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){//&&presetlesson[venueindex][j][k]==0){
+					presetlesson[venueindex][j][k]=0;
 					var thiscell = table.rows[j].cells[k].childNodes[0];
 					teachingplanct[venueindex][thiscell.selectedIndex]--;
 
@@ -732,19 +844,20 @@ function advancegenerate(){
 	advancegen = 1;
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
-	for (var j=1; j<table.rows.length; j++){
-		for (var k=2; k<table.rows[j].cells.length; k++){
-			if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
-				pass = false;
-				break;
-			}
-		}
-	}
-	if (pass == false){
+	// generatedone = 0;
+	// for (var j=1; j<table.rows.length; j++){
+	// 	for (var k=2; k<table.rows[j].cells.length; k++){
+	// 		if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+	// 			// pass = false;
+	// 			// break;
+	// 			generatedone++;
+	// 		}
+	// 	}
+	// }
+	if (0==3){//(pass == false){
 		alert("Please cancel all selected options in the table first.");
 	} else {
 		//seting the order list		
-		generatedone = 0;
 		var tempselect = table.rows[1].cells[2].childNodes[0];
 		var templist = [];
 		var genderorder='Male';
@@ -754,23 +867,24 @@ function advancegenerate(){
 		// } else {
 		// 	divnum = 4;
 		// }
-		if (parseInt(j/divnum)%2==0){
-			genderorder = 'Male';
-		} else {
-			genderorder = 'Female';
-		}
+		
 		for (var j=0; j<tempselect.length; j++){
 			templist[j] = tempselect.options[j].text.substring(0,tempselect.options[j].text.indexOf(" "));
 			optionlist[j] = j;
 		}
 		for (var j=1; j<tempselect.length-1; j++){
+			if (parseInt(j/divnum)%2==0){
+				genderorder = 'Male';
+			} else {
+				genderorder = 'Female';
+			}
 			var different = j+1;
 			var cannotfind = true;
-			while (templist[j]==templist[different]&&findgender(templist[j])!=genderorder&&different<tempselect.length-1){
-				if (templist[j]==templist[different]&&findgender(templist[j])!=genderorder)
-					cannotfind = false;
-				different++;
-			}
+			// while (templist[j]==templist[different]&&findgender(templist[j])!=genderorder&&different<tempselect.length-1){
+			// 	if (templist[j]==templist[different]&&findgender(templist[j])!=genderorder)
+			// 		cannotfind = false;
+			// 	different++;
+			// }
 			if (cannotfind){
 				different = j+1;
 				while (templist[j]==templist[different]&&different<tempselect.length-1){
@@ -787,7 +901,31 @@ function advancegenerate(){
 		var startoption = 1;
 		middleout = 0;
 		// alert(tablexlength);
-		
+				tablexlength = 8;
+				orderlistx[1] = 1;
+				orderlistx[2] = 2;
+				orderlistx[3] = 3;
+				orderlistx[4] = 4;
+				orderlistx[5] = 5;
+				orderlistx[6] = 6;
+				orderlistx[7] = 7;
+				orderlistx[8] = 8;
+				orderlistx[9] = 9;
+			if (table.id=="HCFtable"){
+				tablexlength = 24;
+				for (var j=1; j<=3; j++){
+					for (var k=1; k<=8; k++){
+						orderlistx[(j-1)*8+k] = (k-1)*3+j;
+					}
+				}
+			} else if (table.id=="LNtable"){
+				tablexlength = 16;
+				for (var j=1; j<=2; j++){
+					for (var k=1; k<=8; k++){
+						orderlistx[(j-1)*8+k] = (k-1)*2+j;
+					}
+				}
+			}
 		for (var j1=2; j1<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j1++){
 			for (var j2=2; j2<=6&&generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2; j2++){
 				if (j1!=j2){
@@ -804,9 +942,28 @@ function advancegenerate(){
 											orderlisty[6] = j5;
 											keepfail = 0;
 											firstindfs = 1;
-											// alert(j1+' '+j2+' '+j3+' '+j4+' '+j5);
+											generatedone = 0;
+											middleout=0;
+											for (var j=1; j<table.rows.length; j++){
+												for (var k=2; k<=6; k++){
+													if (presetlesson[document.getElementById("choosevenuepage").selectedIndex][j][k]==1){
+														// pass = false;
+														// break;
+														generatedone++;
+													} else {
+														if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+															teachingplanct[document.getElementById("choosevenuepage").selectedIndex][table.rows[j].cells[k].childNodes[0].selectedIndex]--;
+															table.rows[j].cells[k].style.backgroundColor = "black";
+															table.rows[j].cells[k].childNodes[0].options[0].selected = true;
+														}
+													}
+												}
+											}
+
+											console.log('test: '+j1+' '+j2+' '+j3+' '+j4+' '+j5);
 											// setTimeout(gocheckprogress, 2000);
 											dfs(table,document.getElementById("choosevenuepage").selectedIndex,1,2,startoption);
+											console.log(generatedone);
 											// document.getElementById("debug").innerHTML = debug;
 										}
 									}
@@ -827,6 +984,7 @@ function advancegenerate(){
 
 		if (generatedone==(table.rows[1].cells[2].childNodes[0].length-1)*2||middleout==1){
 			//check
+			document.getElementById("quotaleft").innerHTML = ((table.rows[1].cells[2].childNodes[0].length-1)*2 - generatedone)+" more to fill!";
 			if (middleout){
 				var checktablelengthx = 9;
 				if (table.id=='HCFtable'){
@@ -874,6 +1032,7 @@ function advancegenerate(){
 			for (var j=1; j<table.rows.length; j++){
 				for (var k=2; k<table.rows[j].cells.length; k++){
 					if (table.rows[j].cells[k].childNodes[0].selectedIndex>0){
+						presetlesson[document.getElementById("choosevenuepage").selectedIndex][j][k]=1;
 						var x = table.rows[j].cells[k].childNodes[0];
 						var timeofcell = table.rows[j].cells[1].innerHTML;
 						var dayofcell = k-2;
@@ -907,19 +1066,35 @@ function generate(){
 	advancegen = 0;
 	var table = document.getElementById(document.getElementById("choosevenuepage").options[document.getElementById("choosevenuepage").selectedIndex].text+'table');
 	var pass = true;
-	for (var j=1; j<table.rows.length; j++){
-		for (var k=2; k<table.rows[j].cells.length; k++){
-			if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
-				pass = false;
-				break;
-			}
-		}
-	}
-	if (pass == false){
+	// for (var j=1; j<table.rows.length; j++){
+	// 	for (var k=2; k<table.rows[j].cells.length; k++){
+	// 		if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+	// 			pass = false;
+	// 			break;
+	// 		}
+	// 	}
+	// }
+	if (0==3){//pass == false){
 		alert("Please cancel all selected options in the table first.");
 	} else {
 		//seting the order list
 		if (overrideorder==0){
+			tablexlength = 8;
+				orderlistx[1] = 1;
+				orderlistx[2] = 2;
+				orderlistx[3] = 3;
+				orderlistx[4] = 4;
+				orderlistx[5] = 5;
+				orderlistx[6] = 6;
+				orderlistx[7] = 7;
+				orderlistx[8] = 8;
+				orderlistx[9] = 9;
+				//----------------
+				orderlisty[2] = 2;
+				orderlisty[3] = 6;
+				orderlisty[4] = 3;
+				orderlisty[5] = 4;
+				orderlisty[6] = 5;
 			if (table.id=="HCFtable"){
 				tablexlength = 24;
 				for (var j=1; j<=3; j++){
@@ -968,24 +1143,24 @@ function generate(){
 				orderlisty[4] = 3;
 				orderlisty[5] = 6;
 				orderlisty[6] = 2;
-			} else {
-				tablexlength = 8;
-				orderlistx[1] = 1;
-				orderlistx[2] = 2;
-				orderlistx[3] = 3;
-				orderlistx[4] = 4;
-				orderlistx[5] = 5;
-				orderlistx[6] = 6;
-				orderlistx[7] = 7;
-				orderlistx[8] = 8;
-				orderlistx[9] = 9;
-				//----------------
-				orderlisty[2] = 2;
-				orderlisty[3] = 6;
-				orderlisty[4] = 3;
-				orderlisty[5] = 4;
-				orderlisty[6] = 5;
-			}
+			} //else {
+			// 	tablexlength = 8;
+			// 	orderlistx[1] = 1;
+			// 	orderlistx[2] = 2;
+			// 	orderlistx[3] = 3;
+			// 	orderlistx[4] = 4;
+			// 	orderlistx[5] = 5;
+			// 	orderlistx[6] = 6;
+			// 	orderlistx[7] = 7;
+			// 	orderlistx[8] = 8;
+			// 	orderlistx[9] = 9;
+			// 	//----------------
+			// 	orderlisty[2] = 2;
+			// 	orderlisty[3] = 6;
+			// 	orderlisty[4] = 3;
+			// 	orderlisty[5] = 4;
+			// 	orderlisty[6] = 5;
+			// }
 		} else {
 			// overrideorder = 0;
 		}
@@ -1000,23 +1175,24 @@ function generate(){
 		// } else {
 		// 	divnum = 4;
 		// }
-		if (parseInt(j/divnum)%2==0){
-			genderorder = 'Male';
-		} else {
-			genderorder = 'Female';
-		}
+		
 		for (var j=0; j<tempselect.length; j++){
 			templist[j] = tempselect.options[j].text.substring(0,tempselect.options[j].text.indexOf(" "));
 			optionlist[j] = j;
 		}
 		for (var j=1; j<tempselect.length-1; j++){
+			if (parseInt(j/divnum)%2==0){
+				genderorder = 'Male';
+			} else {
+				genderorder = 'Female';
+			}
 			var different = j+1;
 			var cannotfind = true;
-			while (templist[j]==templist[different]&&findgender(templist[j])!=genderorder&&different<tempselect.length-1){
-				if (templist[j]==templist[different]&&findgender(templist[j])!=genderorder)
-					cannotfind = false;
-				different++;
-			}
+			// while (templist[j]==templist[different]&&findgender(templist[j])!=genderorder&&different<tempselect.length-1){
+			// 	if (templist[j]==templist[different]&&findgender(templist[j])!=genderorder)
+			// 		cannotfind = false;
+			// 	different++;
+			// }
 			if (cannotfind){
 				different = j+1;
 				while (templist[j]==templist[different]&&different<tempselect.length-1){
@@ -1032,6 +1208,14 @@ function generate(){
 		}
 		var startoption = 1;
 		middleout = 0;
+		generatedone = 0;
+		for (var jj=1; jj<table.rows.length; jj++){
+			for (var kk=2; kk<=6; kk++){
+				if (table.rows[jj].cells[kk].childNodes[0].selectedIndex!=0){
+					generatedone++;
+				}
+			}
+		}
 		// alert(tablexlength);
 		while (generatedone<(table.rows[1].cells[2].childNodes[0].length-1)*2 && startoption<table.rows[1].cells[2].childNodes[0].length&&middleout==0){
 			// alert('start');		
@@ -1045,6 +1229,7 @@ function generate(){
 
 		if (generatedone==(table.rows[1].cells[2].childNodes[0].length-1)*2||middleout==1){
 			//check
+			 document.getElementById("quotaleft").innerHTML = ((table.rows[1].cells[2].childNodes[0].length-1)*2 - generatedone)+" more to fill!";
 			if (middleout){
 				var checktablelengthx = 9;
 				if (table.id=='HCFtable'){
@@ -1092,6 +1277,7 @@ function generate(){
 			for (var j=1; j<table.rows.length; j++){
 				for (var k=2; k<table.rows[j].cells.length; k++){
 					if (table.rows[j].cells[k].childNodes[0].selectedIndex>0){
+						presetlesson[document.getElementById("choosevenuepage").selectedIndex][j][k]=1;
 						var x = table.rows[j].cells[k].childNodes[0];
 						var timeofcell = table.rows[j].cells[1].innerHTML;
 						var dayofcell = k-2;
@@ -1309,12 +1495,26 @@ function findteachingplanid(x){
 	}
 }
 var oldindex = 0;
+var presetlesson = [];
+for (var j=0; j<100; j++){
+	presetlesson[j] = [];
+	for (var k=0; k<100; k++){
+		presetlesson[j][k]=[];
+		for (var jj=0; jj<100; jj++){
+			presetlesson[j][k][jj] = 0;
+		}
+	}
+}
 function getoldindex(x){
 	oldindex = x.selectedIndex;
 }
 var teachingplanct = [];
-for (var j=0; j<500; j++)
+for (var j=0; j<500; j++){
 	teachingplanct[j]=[];
+	for (var k=0; k<500; k++){
+		teachingplanct[j][k] = 0;
+	}
+}
 function checktable(x,y){
 	var venueindex = document.getElementById('choosevenuepage').selectedIndex;
 	var table = x.parentNode.parentNode.parentNode.parentNode;
@@ -1339,6 +1539,7 @@ function checktable(x,y){
 	var dayofcell = x.parentNode.cellIndex-2;
 	var timeofcell = table.rows[x.parentNode.parentNode.rowIndex].cells[1].innerHTML;
 	if (oldindex>0){
+		generatedone--;
 		teachingplanct[venueindex][oldindex]--;
 		var temptable = document.getElementById(x.options[oldindex].text.substring(0,x.options[oldindex].text.indexOf(" "))+"timetable");
 		var coursecode = x.options[oldindex].text.substring(x.options[oldindex].text.indexOf(" ")+1, x.options[oldindex].text.length);
@@ -1360,7 +1561,12 @@ function checktable(x,y){
 		}
 	}
 	
+	if (x.selectedIndex==0){
+		presetlesson[venueindex][x.parentNode.parentNode.rowIndex][x.parentNode.cellIndex]=0;
+	}
 	if (x.selectedIndex>0){
+		generatedone++;
+		presetlesson[venueindex][x.parentNode.parentNode.rowIndex][x.parentNode.cellIndex]=1;
 		teachingplanct[venueindex][x.selectedIndex]++;
 		var temptable = document.getElementById(x.options[x.selectedIndex].text.substring(0,x.options[x.selectedIndex].text.indexOf(" "))+"timetable");
 		var coursecode = x.options[x.selectedIndex].text.substring(x.options[x.selectedIndex].text.indexOf(" ")+1, x.options[x.selectedIndex].text.length);
@@ -1411,6 +1617,7 @@ function checktable(x,y){
 		}
 	}
 	//document.getElementById('debug').innerHTML = teachingplanct;
+	document.getElementById("quotaleft").innerHTML = ((table.rows[1].cells[2].childNodes[0].length-1)*2 - generatedone)+" more to fill!";
 }
 function changetable(x){
 	for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
@@ -1419,6 +1626,7 @@ function changetable(x){
 	}
 	document.getElementById(x+"table").hidden=false;
 	var table = document.getElementById(x+"table");
+	document.getElementById("quotaleft").innerHTML = ((table.rows[1].cells[2].childNodes[0].length-1)*2 - generatedone)+" more to fill!";
 	var changetablelengthx = 9;
 	// overrideorder = 0;
 	if (table.id=="HCFtable"){
@@ -1436,9 +1644,13 @@ function changetable(x){
 		changetablelengthx = 18;
 	}
 	middleout = 0;
+	generatedone = 0;
 	for (var j=1; j<=changetablelengthx; j++){
 		var tempchecktime = table.rows[j].cells[1].innerHTML;
 		for (var k=2; k<=7; k++){
+			if (table.rows[j].cells[k].childNodes[0].selectedIndex!=0){
+				generatedone++;
+			}
 			var temptime = table.rows[j].cells[1].innerHTML;
 			var tempoption = table.rows[j].cells[k].childNodes[0];
 			//if (tempoption.selectedIndex==0){
@@ -1463,6 +1675,7 @@ function changetable(x){
 			//}
 		}
 	}
+	document.getElementById("quotaleft").innerHTML = ((table.rows[1].cells[2].childNodes[0].length-1)*2 - generatedone)+" more to fill!";
 }
 function changetableheader(x){
 	overrideorder = 0;
@@ -1579,7 +1792,9 @@ function nextpage(){
 					for (var jj=0; jj<teachingplantable.rows.length; jj++){
 						if (teachingplantable.rows[jj].cells[2].innerHTML==x){
 							var classid = teachingplantable.rows[jj].cells[5].innerHTML; //childNodes[0].value;
-							tempoption+='<option>'+teachingplantable.rows[jj].cells[1].innerHTML+'  '+classid+'</option>';
+							if (classid.substring(0,1)!='S'){
+								tempoption+='<option>'+teachingplantable.rows[jj].cells[1].innerHTML+'  '+classid+'</option>';
+							}
 						}
 					}
 					if (x=='HCF'){
@@ -1872,6 +2087,9 @@ function showprint(){
 function printteacher(){
 	var tempoutput = '';
 	var table = '';
+	if (confirm("Do you want to download now?")){
+		isprint = 1;
+	}
 	for (var j=0; j<document.getElementById("teacherlist").rows.length; j++){
 		// console.log(j);
 		var tempteachername = document.getElementById("teacherlist").rows[j].cells[1].innerHTML;
@@ -1953,10 +2171,13 @@ function printteacher(){
 var isprint = 0;
 var finalvenuelist = [];
 function printall(){
-	isprint = 1;
 	var ucgadded = 0;
 	var tempoutput = '';
-	if (confirm("Are you sure you have done everthing here?")){
+	//if (confirm("Are you sure you have done everthing here?")){
+		if (confirm("Do you want to download now?")){
+			isprint = 1;
+		}
+		
 		for (var j=0; j<document.getElementById("venuelist").rows.length; j++){
 			var table = document.getElementById(document.getElementById("venuelist").rows[j].cells[1].innerHTML+"table");
 			if (table.id.substring(0,2)=="LN"){
@@ -2148,23 +2369,26 @@ function printall(){
 			table.rows[(j-1)*4+4].deleteCell(0);
 		}
 		// newwindow.alert(finalvenuelist.length);
-		for (var j=0; j<finalvenuelist.length; j++){
-			if (newwindow.confirm('download '+finalvenuelist[j]+'?')){
-				var table = newwindow.document.getElementById(finalvenuelist[j]+"output");
-				// newwindow.alert(table.id);
-				var elHtml = "<html><body><style>table, th{border: 1px solid black;}</style><table>"+finalvenuelist[j]+'<br>'+table.innerHTML+"</table></body></html>";
-			    var link = document.createElement('a');
-			    var mimeType = 'text/plain';
-			    var filename = finalvenuelist[j]+'.html';
-			    link.setAttribute('download', filename);
-			    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
-			    link.click();
+		if (isprint){
+			for (var j=0; j<finalvenuelist.length; j++){
+				if (newwindow.confirm('download '+finalvenuelist[j]+'?')){
+					var table = newwindow.document.getElementById(finalvenuelist[j]+"output");
+					// newwindow.alert(table.id);
+					var elHtml = "<html><body><style>table, th{border: 1px solid black;}</style><table>"+finalvenuelist[j]+'<br>'+table.innerHTML+"</table></body></html>";
+				    var link = document.createElement('a');
+				    var mimeType = 'text/plain';
+				    var filename = finalvenuelist[j]+'.html';
+				    link.setAttribute('download', filename);
+				    link.setAttribute('href', 'data:' + mimeType  +  ';charset=utf-8,' + encodeURIComponent(elHtml));
+				    link.click();
+				}
 			}
 		}
-		printteacher();
+		
+		// printteacher();
 		
 		alert('venue table done');
-	}
+	// }
 }
 </script>
 </body>
